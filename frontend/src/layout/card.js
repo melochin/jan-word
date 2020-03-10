@@ -1,7 +1,7 @@
 import React from 'react';
 import {Row, Col} from 'antd';
 import { Button } from 'antd';
-import { CaretRightOutlined } from '@ant-design/icons';
+import { CaretLeftOutlined, CaretRightOutlined } from '@ant-design/icons';
 
   
 const renderFront = (word) => {
@@ -28,42 +28,18 @@ const renderBack = (word) => {
  *value，
  * renderFront
  */
-const style = {
-    textAlign: 'center', 
-    height: '100%'
-}
-
 class Card extends React.Component {
 
     constructor(props) {
         super(props);
-        this.handleClick = this.handleClick.bind(this)
-        this.state = {
-            isFront : true, 
-        }
-    }
-    
-    componentWillReceiveProps(props, state) {
-        this.setState({
-            isFront: true,
-        })
-    }
-
-    handleClick() {
-        if (this.state.isFront) {
-            this.setState({
-                isFront: false,
-            })
-        }
     }
 
     render() {
         return (
             <Row onClick={this.handleClick} 
-                    justify="space-around" align="middle"  style={{...style}}>
+                    justify="space-around" align="middle"  style={{height: '100%', textAlign: 'center'}}>
                 <Col span={24}>
-                    {this.state.isFront && this.props.renderFront(this.props.value)}
-                    {!this.state.isFront && this.props.renderBack(this.props.value)}
+                    {this.props.value}
                 </Col>
             </Row>
         )
@@ -93,7 +69,9 @@ class CardList extends React.Component  {
         constructor(props) {
             super(props)
             this.handleClick = this.handleClick.bind(this);
-            this.state = {current: -1}
+            this.onKeyDown = this.onKeyDown.bind(this);
+            this.onTurn = this.onTurn.bind(this);
+            this.state = {current: -1, front: true}
             this.list = [];
         }
 
@@ -104,35 +82,89 @@ class CardList extends React.Component  {
             this.setState({
                 current: 0
             })
+            document.addEventListener('keydown', this.onKeyDown);
         }
 
         handleClick() {
                 this.setState({
+                    front: true,
                     current: this.state.current + 1
                 })
         }
 
+        onKeyDown(e) {
+            switch(e.keyCode) {
+                case 37:
+                    // 卡片反面，左边箭头代表不知道
+                    if (this.state.front == false) {
+                        this.onWrong();
+                    }
+                    break;
+                case 39:
+                    // 卡片正面，右边箭头代表翻反面        
+                    // 卡片反面，右边箭头代表知道
+                    if (this.state.front) {
+                        this.onTurn();
+                    } else {
+                        this.onRight();
+                    }
+                    break;
+            }
+        }
+
+        onRight() {
+            this.handleClick();
+        }
+
+        onWrong() {
+            this.handleClick();
+        }
+
+        onTurn() {
+            if (this.state.front && this.state.current < this.list.length) {
+                this.setState({
+                    front: false
+                })
+            }
+        }
+
+        renderCard() {
+            if (this.state.current >= 0 && this.state.current < this.list.length) {
+                return (
+                    <Card value={
+                        this.state.front ? 
+                        this.props.renderFront(this.list[this.state.current]) :
+                        this.props.renderBack(this.list[this.state.current])
+                    } />
+                )
+            } else {
+                return (<EndCard />);
+            }
+        }
+
         render() {
             return (
-                <Row style={{height: '100%'}}   justify="space-around" align="middle"  >
+                <Row style={{height: '100%'}}   justify="space-around" align="middle" onClick={this.onTurn} >
                     <Col span={2}></Col>
-                    <Col span={20} style={{height:'100%'}}>
-                        {
-                            this.state.current >= 0 && this.state.current < this.list.length &&
-                            <Card value={this.list[this.state.current]} 
-                                renderFront={this.props.renderFront} renderBack={this.props.renderBack}/>
-                        }
-                        {
-                            this.state.current == this.list.length && 
-                            <EndCard />
-                        }
+                    <Col span={20} align="middle" style={{height: '100%'}}>
+                        <Col span={24} style={{height: '25%'}}></Col>
+                        <Col span={24} style={{height:'50%'}} >
+                            {this.renderCard()}
+                        </Col>
+                        <Col span={24} style={{height:'25%'}}>
+                            {this.state.front == false &&
+                            <div>
+                                <Button type="danger" onClick={this.handleClick} style={{marginRight: '1rem'}}>
+                                    <CaretLeftOutlined /> 记忆错误
+                                </Button>
+                                <Button type="primary" onClick={this.handleClick}>
+                                    记忆正确<CaretRightOutlined />
+                                </Button>
+                            </div>
+                            }
+                        </Col>
                     </Col>
-                    <Col span={2}>
-                        {
-                            this.state.current < this.list.length &&
-                            <Button size="large" onClick={this.handleClick} icon={<CaretRightOutlined />} ></Button>
-                        }
-                    </Col>
+                    <Col span={2}></Col>
                 </Row>
             )
         }
