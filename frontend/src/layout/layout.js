@@ -30,12 +30,13 @@ class SiderMenu extends React.Component{
     let path = this.props.location.pathname.split("/");
 
     return (
-      <Sider className="site-layout-background" width={200}>
+      <Sider       
+        breakpoint="md" collapsedWidth="0" 
+        className="site-layout-background" width={'10rem'}>
           <Menu
           mode="inline"
-          defaultSelectedKeys={[path[2]]}
+          defaultSelectedKeys={ this.props.location.pathname}
           defaultOpenKeys={[path[1]]}
-          
           style={{ height: '100%' }}
         >
           <SubMenu
@@ -47,10 +48,10 @@ class SiderMenu extends React.Component{
               </span>
             }
           >
-            <Menu.Item key="word">
+            <Menu.Item key="/card/word">
               <Link to="/card/word">单词</Link>
               </Menu.Item>
-            <Menu.Item key="grammar">
+            <Menu.Item key="/card/grammar">
                 <Link to="/card/grammar">
                   语法
                 </Link>
@@ -64,10 +65,10 @@ class SiderMenu extends React.Component{
               </span>
             }
           >
-            <Menu.Item key="word">
+            <Menu.Item key="/data/word">
               <Link to="/data/word">单词</Link>
             </Menu.Item>
-            <Menu.Item key="grammar">
+            <Menu.Item key="/data/grammar">
               <Link to="/data/grammar">语法</Link>
             </Menu.Item>
           </SubMenu>
@@ -79,7 +80,6 @@ class SiderMenu extends React.Component{
 
 function Main(props) {
 
-    console.log(props);
     return (
         <Router>
         <Layout>
@@ -97,12 +97,12 @@ function Main(props) {
           </Menu>
         </Header>
         <Content style={{ padding: '0 50px' }}>
-          <Breadcrumb style={{ margin: '16px 0' }}>
+          {/* <Breadcrumb style={{ margin: '16px 0' }}>
             <Breadcrumb.Item>Home</Breadcrumb.Item>
             <Breadcrumb.Item>List</Breadcrumb.Item>
             <Breadcrumb.Item>App</Breadcrumb.Item>
-          </Breadcrumb>
-          <Layout className="site-layout-background" style={{ padding: '24px 0' }}>
+          </Breadcrumb> */}
+          <Layout className="site-layout-background" style={{ padding: '1rem 0' }}>
             {withRouter(SiderMenu)(props)}
             <Content style={{ margin:'0 10px', padding: '0 24px', minHeight: 280, backgroundColor: 'white' }}>
               <Switch>
