@@ -1,4 +1,5 @@
 import axios from 'axios';
+import {uri} from './config.js';
 let data = [
     {
         id: 1,
@@ -45,7 +46,10 @@ export const list = () => {
         .then(response => response.data);
 }
 
+export const modify = (values) => {
+    return axios.put(`${uri}/word`, values);
+}
 
 export const remove = (id) =>{
-    return axios.delete(`http://localhost:8080/word/${id}`);
+    return axios.delete(`${uri}/word/${id}`);
 }

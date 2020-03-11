@@ -1,10 +1,7 @@
 package me.kazechin.janword.mapper;
 
 import me.kazechin.janword.word.Word;
-import org.apache.ibatis.annotations.Delete;
-import org.apache.ibatis.annotations.Insert;
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.*;
 
 import java.util.List;
 
@@ -19,4 +16,7 @@ public interface WordDao {
 
 	@Delete("delete from word where id = #{id}")
 	void remove(int id);
+
+	@Update("update word set word=#{word}, gana=#{gana}, chinese=#{chinese} where id=#{id}")
+	void modify(Word word);
 }

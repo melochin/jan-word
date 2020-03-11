@@ -1,9 +1,9 @@
-import React from 'react';
+import React, {useState, useEffect}from 'react';
 import { Form, Input, Button } from 'antd';
 import { Table } from 'antd';
 import {ModalForm} from './modalForm';
 
-import {add, remove, list} from '../../action/wordAction.js';
+import {add, remove, list, modify} from '../../action/wordAction.js';
 
 const layout = {
     labelCol: { span: 6 },
@@ -40,7 +40,7 @@ const items = [
         </Form.Item>
     ),
     (
-        <Form.Item wrapperCol={{ ...layout.wrapperCol, offset: 6 }}>
+        <Form.Item wrapperCol={{ ...layout.wrapperCol, offset: 6 }} >
             <Button type="primary" htmlType="submit">提交</Button>
         </Form.Item>
     )
@@ -50,87 +50,98 @@ const items = [
  * 单词的维护表格（CRUD）
  *
  */
-export class WordTable extends React.Component {
+export function WordTable(props) {
 
-    constructor(props) {
-        super(props);
-        this.state = {dataSource: [], visible: false}
-        this.onCancel = this.onCancel.bind(this);
-        this.onCreate = this.onCreate.bind(this);
-        this.onDelete = this.onDelete.bind(this);
-        this.columns  = [
-            {
-              title: '日语',
-              dataIndex: 'word',
-              key: 'word',
-              render: text => <span>{text}</span>,
-            },
-            {
-                title: '假名',
-                dataIndex: 'gana',
-                key: 'gana',
-                render: text => <span>{text}</span>,
-              },
-              {
-                title: '中文',
-                dataIndex: 'chinese',
-                key: 'chinese',
-                render: text => <span>{text}</span>,
-              },
-              {
-                  title: '操作',
-                  key: 'operation',
-                  render: (text, record) => (
-                      <span>
-                          <Button disabled="disabled" type='primary' style={{marginRight: '5px'}}>修改</Button>
-                          <Button type='danger' onClick={() => this.onDelete(record.id)}>删除</Button>
-                      </span>
-                  )
-              }
-        ];
+    const [dataSource, setDataSource] = useState([]);
+    const [visible, setVisible] = useState(false);
+    const [initialValues, setInitialValues] = useState(new Object());
+    const [mode, setMode] = useState('new');
+
+    useEffect(() => {
+      onList()  
+    }, [])
+
+    const columns = [
+        {
+          title: '日语',
+          dataIndex: 'word',
+          key: 'word',
+          render: text => <span>{text}</span>,
+        },
+        {
+            title: '假名',
+            dataIndex: 'gana',
+            key: 'gana',
+            render: text => <span>{text}</span>,
+          },
+          {
+            title: '中文',
+            dataIndex: 'chinese',
+            key: 'chinese',
+            render: text => <span>{text}</span>,
+          },
+          {
+              title: '操作',
+              key: 'operation',
+              render: (text, record) => (
+                  <span>
+                      <Button  type='primary' style={{marginRight: '5px'}}
+                        onClick={() => openModify(record)}
+                      >修改</Button>
+                      <Button type='danger' onClick={() => onDelete(record.id)}>删除</Button>
+                  </span>
+              )
+          }
+    ];
+
+    const openModify = (record) => {
+        setVisible(true);
+        setInitialValues(record);
+        setMode('modify');
     }
 
-    async onCreate(values) {
+    const onCreate = async (values) => {
         await add(values);
-        this.onList();
-        this.onCancel();
+        onList();
+        onCancel();
     }
 
-    onCancel = () => {
-        this.setState({
-            visible: false
-        })
+    const onModify = async(values) => {
+        await modify(values);
+        onList();
+        onCancel();
+    }
+
+    const onCancel = () => {
+        setInitialValues(new Object());
+        setVisible(false);
       }
 
-    async onDelete(id) {
+    const onDelete = async (id) => {
         await remove(id)
-        this.onList();
+        onList();
     }
 
-    async onList() {
+    const onList = async () => {
         const dataSource = await list();
-        console.log(dataSource);
-        this.setState({
-            dataSource: dataSource
-        });
+        setDataSource(dataSource);
       }
 
-    componentDidMount() {
-        this.onList();
-    }
-
-    render() {
-        return (
-            <div>
-                <div className="table-operations">
-                    <Button onClick={() => this.setState({visible: true})}>新增</Button>
-                    <ModalForm visible={this.state.visible} title='新增'  items={items} onCreate={this.onCreate} onCancel={this.onCancel}>
-                            <div></div>
-                    </ModalForm>
-                </div>
-            <Table columns={this.columns} dataSource={this.state.dataSource} />
+      return (
+        <div>
+            <div className="table-operations">
+                <Button onClick={() => setVisible(true)}>新增</Button>
+                <ModalForm 
+                    visible={visible}  
+                    items={items} 
+                    onCreate={onCreate} 
+                    onCancel={onCancel}
+                    onModify={onModify}
+                    initialValues={initialValues}
+                    mode={mode}>
+                </ModalForm>
             </div>
-        )
-    }
-
+        <Table columns={columns} dataSource={dataSource} rowKey={record => record.id}/>
+        </div>
+    )
 }

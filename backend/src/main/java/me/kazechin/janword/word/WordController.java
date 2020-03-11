@@ -23,6 +23,11 @@ public class WordController {
 		wordDao.add(word);
 	}
 
+	@PutMapping("/word")
+	public void modify(@RequestBody Word word) {
+		wordDao.modify(word);
+	}
+
 	@DeleteMapping("/word/{id}")
 	public void remove(@PathVariable int id) {
 		wordDao.remove(id);
