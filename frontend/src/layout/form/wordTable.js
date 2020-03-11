@@ -1,14 +1,21 @@
 import React, {useState, useEffect}from 'react';
 import { Form, Input, Button } from 'antd';
 import { Table } from 'antd';
-import {ModalForm} from './modalForm';
-
+import {ModalForm, useModalForm} from './modalForm';
 import {add, remove, list, modify} from '../../action/wordAction.js';
 
 const layout = {
     labelCol: { span: 6 },
     wrapperCol: { span: 12 },
   };
+
+const WordForm = ({form, onSubmit}) => {
+    return (
+        <Form form={form} onFinish={onSubmit} {...layout}>
+            {items}
+        </Form>
+    )
+}
 
 const items = [
     (
@@ -46,16 +53,11 @@ const items = [
     )
 ]
 
-/**
- * 单词的维护表格（CRUD）
- *
- */
-export function WordTable(props) {
 
+export function WordTable() {
+
+    const modalForm = useModalForm();
     const [dataSource, setDataSource] = useState([]);
-    const [visible, setVisible] = useState(false);
-    const [initialValues, setInitialValues] = useState(new Object());
-    const [mode, setMode] = useState('new');
 
     useEffect(() => {
       onList()  
@@ -86,7 +88,7 @@ export function WordTable(props) {
               render: (text, record) => (
                   <span>
                       <Button  type='primary' style={{marginRight: '5px'}}
-                        onClick={() => openModify(record)}
+                        onClick={() => modalForm.setModify(record)}
                       >修改</Button>
                       <Button type='danger' onClick={() => onDelete(record.id)}>删除</Button>
                   </span>
@@ -94,51 +96,38 @@ export function WordTable(props) {
           }
     ];
 
-    const openModify = (record) => {
-        setVisible(true);
-        setInitialValues(record);
-        setMode('modify');
+    const onList = async () => {
+        const dataSource = await list();
+        setDataSource(dataSource);
     }
 
-    const onCreate = async (values) => {
+    const onAdd = async (values) => {
         await add(values);
         onList();
-        onCancel();
+        modalForm.onCancel();
     }
 
-    const onModify = async(values) => {
+    const onModify = async(values, preValues) => {
+        values.id = preValues.id;
         await modify(values);
         onList();
-        onCancel();
+        modalForm.onCancel();
     }
-
-    const onCancel = () => {
-        setInitialValues(new Object());
-        setVisible(false);
-      }
 
     const onDelete = async (id) => {
         await remove(id)
         onList();
     }
 
-    const onList = async () => {
-        const dataSource = await list();
-        setDataSource(dataSource);
-      }
-
       return (
         <div>
             <div className="table-operations">
-                <Button onClick={() => setVisible(true)}>新增</Button>
+                <Button onClick={modalForm.setAdd}>新增</Button>
                 <ModalForm 
-                    visible={visible}  
-                    items={items} 
-                    onCreate={onCreate} 
-                    onCancel={onCancel}
-                    onModify={onModify}
-                    initialValues={initialValues}
-                    mode={mode}>
+                    {...modalForm}
+                    onAdd={onAdd} 
+                    onModify={onModify}>
+                        {(form) => <WordForm {...form} />}
                 </ModalForm>
             </div>
         <Table columns={columns} dataSource={dataSource} rowKey={record => record.id}/>

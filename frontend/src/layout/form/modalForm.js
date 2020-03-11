@@ -1,26 +1,23 @@
-import React, {useEffect} from 'react';
+import React, {useState, useEffect} from 'react';
 import { Form, Modal } from 'antd';
 
-const layout = {
-    labelCol: { span: 6 },
-    wrapperCol: { span: 12 },
-  };
-
-export const ModalForm = ({visible, onCreate, onModify, onCancel, items, initialValues, mode}) => {
+export const ModalForm = ({visible, onAdd, onModify, onCancel, children, initialValues, mode}) => {
 
     const [form] = Form.useForm();
 
-    useEffect(() => {
-        form.resetFields();
+    useEffect(() => {        
+        if (initialValues == null) {
+            form.resetFields();
+        } else {
+            form.setFieldsValue(initialValues);
+        }
     })
     
     const onSubmit = values => {
         if (mode != 'modify') {
-            onCreate(values);
+            onAdd(values);
         } else {
-            // 带上ID
-            values.id = initialValues.id;
-            onModify(values);
+            onModify(values, initialValues);
         }
       };
 
@@ -37,9 +34,39 @@ export const ModalForm = ({visible, onCreate, onModify, onCancel, items, initial
             cancelText='Cancel'
             onCancel={onCancel}
             onOk={onSubmit}>
-            <Form form={form} onFinish={onSubmit} {...layout} initialValues={initialValues}>
-                {items}
-            </Form>
+            {children({form, onSubmit})}
         </Modal>
     )
+}
+
+export const useModalForm = () => {
+    const [visible, setVisible] = useState(false);
+    const [initialValues, setInitialValues] = useState(new Object());
+    const [mode, setMode] = useState('new');
+
+    const setModify = (record) => {
+        setVisible(true);
+        setInitialValues(record);
+        setMode('modify');
+    }
+
+    const setAdd = () => {
+        setVisible(true);
+        setInitialValues(null);
+        setMode('new');
+    }
+
+    const onCancel = () => {
+        setVisible(false);
+    }
+
+    return {
+        visible,
+        initialValues,
+        mode,
+        setModify,
+        setAdd,
+        onCancel
+    }
+
 }
