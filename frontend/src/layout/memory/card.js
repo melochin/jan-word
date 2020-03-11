@@ -1,111 +1,102 @@
 import React from 'react';
-import {Row, Col} from 'antd';
-import { Button } from 'antd';
+import {Row, Col, Button} from 'antd';
 import { CaretLeftOutlined, CaretRightOutlined } from '@ant-design/icons';
 
-/**
- * 功能：卡片拥有正反两面，正面显示提问，反面显示答案。
- *               卡片默认显示正面，点击卡片时反转反面
- * 
- * props：
- *value，
- * renderFront
- */
-class Card extends React.Component {
-
-    constructor(props) {
-        super(props);
-    }
-
-    render() {
-        return (
-            <Row onClick={this.handleClick} 
-                    justify="space-around" align="middle"  style={{height: '100%', textAlign: 'center'}}>
-                <Col span={24} style={{fontSize: "2rem"}}>
-                    {this.props.value}
-                </Col>
-            </Row>
-        )
-    }
-
+const Card = ({value}) => {
+    return (
+        <Row justify="space-around" align="middle"  style={{height: '100%', textAlign: 'center'}}>
+            <Col span={24} style={{fontSize: "2rem"}}>
+                {value}
+            </Col>
+        </Row>
+    )
 }
 
-class EndCard extends React.Component {
-    constructor(props) {
-        super(props);
-    }
-
-    render() {
-        return (
-            <Row  justify="space-around" align="middle"   style={{height: '100%', textAlign: 'center'}}>
-                <Col span={24} style={{fontSize: "2rem"}}>
+const EndCard = () => {
+    const ele = (
+        <div>
                     <p>{'おつかれ'}</p>
                     <p>{'（●´∀｀）♪'}</p>
-                </Col>
-            </Row>
-        )
-    }
+        </div>
+    )
+    return (<Card value={ele} />);
 }
 
+/**
+ * 
+ */
 class CardList extends React.Component  {
 
         constructor(props) {
             super(props)
-            this.handleClick = this.handleClick.bind(this);
+            this.onNextCard = this.onNextCard.bind(this);
             this.onKeyDown = this.onKeyDown.bind(this);
-            this.onTurn = this.onTurn.bind(this);
+            this.onTurnCard = this.onTurnCard.bind(this);
             this.state = {current:  null, front: true}
             this.list = [];
         }
 
         async componentDidMount() {
-            // TODO 后台接口需要返回合适的数据格式，前端不调整数据格式
             let datasource = await this.props.list()
             this.list = datasource;
-            console.log(this.list);
+            
             this.setState({
                 current: this.list.pop()
             })
             document.addEventListener('keydown', this.onKeyDown);
         }
 
-        handleClick() {
+        async onNextCard() {
+                let current = this.list.pop();
+                if (current == null) {
+                    await this.props.finish();
+                }
                 this.setState({
                     front: true,
-                    current: this.list.pop()
+                    current: current
                 })
         }
 
+        /**
+         * 
+         * @param {*} e 
+         */
         onKeyDown(e) {
             switch(e.keyCode) {
                 case 37:
-                    // 卡片反面，左边箭头代表不知道
                     if (this.state.front == false) {
-                        this.onWrong();
+                        // 左边箭头，忘记
+                        this.onForget();
                     }
                     break;
                 case 39:
-                    // 卡片正面，右边箭头代表翻反面        
-                    // 卡片反面，右边箭头代表知道
                     if (this.state.front) {
-                        this.onTurn();
+                        // 右边箭头，翻卡
+                        this.onTurnCard();
                     } else {
-                        this.onRight();
+                        // 右边箭头，记得
+                        this.onRemember();
                     }
                     break;
             }
         }
 
-        onRight(val) {
-            this.handleClick();
+        async onRemember() {
+            let isRemembered = await this.props.remeber(this.state.current.id);
+            if (isRemembered == false) {
+                this.list.unshift(this.state.current);
+            }
+            this.onNextCard();
         }
 
-        onWrong(val) {
-            this.list.unshift(val);
-            this.handleClick();
+        async onForget() {
+            await this.props.forget(this.state.current.id);
+            this.list.unshift(this.state.current);
+            this.onNextCard();
         }
 
-        onTurn() {
+        onTurnCard() {
+            // 正面且不是最后一个，才可以翻转卡片
             if (this.state.front && this.state.current != null) {
                 this.setState({
                     front: false
@@ -129,7 +120,7 @@ class CardList extends React.Component  {
 
         render() {
             return (
-                <Row style={{height: '100%'}}   justify="space-around" align="middle" onClick={this.onTurn} >
+                <Row style={{height: '100%'}}   justify="space-around" align="middle" onClick={this.onTurnCard} >
                     <Col span={2}></Col>
                     <Col span={20} align="middle" style={{height: '100%'}}>
                         <Col span={24} style={{height: '25%'}}></Col>
@@ -139,11 +130,11 @@ class CardList extends React.Component  {
                         <Col span={24} style={{height:'25%'}}>
                             {this.state.front == false &&
                             <div>
-                                <Button type="danger" onClick={() => this.onWrong(this.state.current)} style={{marginRight: '1rem'}}>
-                                    <CaretLeftOutlined /> 记忆错误
+                                <Button type="danger" onClick={this.onForget} style={{marginRight: '1rem'}}>
+                                    <CaretLeftOutlined /> 记得
                                 </Button>
-                                <Button type="primary" onClick={() => this.onRight(this.state.current)}>
-                                    记忆正确<CaretRightOutlined />
+                                <Button type="primary" onClick={this.onRemember}>
+                                    忘记<CaretRightOutlined />
                                 </Button>
                             </div>
                             }

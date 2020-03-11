@@ -1,6 +1,6 @@
 import React from 'react';
 import CardList from './card';
-import {list} from '../action/wordAction';
+import {list, forget, remeber, finish} from '../../action/cardAction';
 
 const renderFront = (word) => {
     return (
@@ -20,7 +20,8 @@ const renderBack = (word) => {
 
 const WordCard = () => {
     return (
-        <CardList list={list} renderFront={renderFront} renderBack={renderBack}/>
+        <CardList list={list}  remeber={remeber} forget={forget} finish = {finish} 
+            renderFront={renderFront} renderBack={renderBack}/>
     )
 }
 

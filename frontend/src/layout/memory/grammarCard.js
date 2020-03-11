@@ -1,6 +1,6 @@
 import React from 'react';
 import CardList from './card';
-import {list} from '../action/grammarAction';
+import {list} from '../../action/grammarAction';
 
 const renderFront = (grammar) => {
     let index = parseInt(Math.random() * grammar.sentences.length);
@@ -17,12 +17,12 @@ const renderBack = (grammar) => {
             <p>{grammar.detail}</p>
         </div>
     )
-
 }
 
 const GrammarWord = () => {
     return (
-        <CardList list={list} renderFront={renderFront} renderBack={renderBack}/>
+        <CardList list={list} 
+            renderFront={renderFront} renderBack={renderBack}/>
     )
 }
 

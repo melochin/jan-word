@@ -1,11 +1,10 @@
 import React from 'react';
-import { Layout, Menu, Breadcrumb } from 'antd';
+import { Layout, Menu } from 'antd';
 import { UserOutlined } from '@ant-design/icons';
-import WordCard from './wordCard.js';
-import GrammarCard from './grammarCard';
-import {list} from '../data/cardlist.js';
-import {WordTable} from './form/word.js';
-import {GrammarTable} from './form/grammar';
+import WordCard from './memory/wordCard.js';
+import GrammarCard from './memory/grammarCard';
+import {WordTable} from './form/wordTable.js';
+import {GrammarTable} from './form/grammarTable';
 
 import {
   BrowserRouter as Router,
