@@ -38,11 +38,11 @@ let data = [
 // }
 
 export const add = (values) => {
-    return axios.post('http://localhost:8080/word', values);
+    return axios.post(`${uri}/word`, values);
 }
 
 export const list = () => {
-    return axios.get('http://localhost:8080/words')
+    return axios.get(`${uri}/words`)
         .then(response => response.data);
 }
 

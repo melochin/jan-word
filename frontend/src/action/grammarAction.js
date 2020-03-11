@@ -2,7 +2,7 @@ import axios from 'axios';
 import {uri} from './config';
 
 export const add = (values) => {
-    return axios.post('http://localhost:8080/grammar', values);
+    return axios.post(`${uri}/grammar`, values);
 }
 
 export const list = () => {
