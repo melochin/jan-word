@@ -3,23 +3,6 @@ import {Row, Col} from 'antd';
 import { Button } from 'antd';
 import { CaretLeftOutlined, CaretRightOutlined } from '@ant-design/icons';
 
-  
-const renderFront = (word) => {
-    return (
-        <p>{word.word}</p>
-    )
-}
-
-const renderBack = (word) => {
-    return (
-        <div>
-            <p>{word.gana}</p>
-            <p>{word.chinese}</p>
-        </div>
-    )
-
-}
-
 /**
  * 功能：卡片拥有正反两面，正面显示提问，反面显示答案。
  *               卡片默认显示正面，点击卡片时反转反面
@@ -38,7 +21,7 @@ class Card extends React.Component {
         return (
             <Row onClick={this.handleClick} 
                     justify="space-around" align="middle"  style={{height: '100%', textAlign: 'center'}}>
-                <Col span={24}>
+                <Col span={24} style={{fontSize: "2rem"}}>
                     {this.props.value}
                 </Col>
             </Row>
@@ -55,7 +38,7 @@ class EndCard extends React.Component {
     render() {
         return (
             <Row  justify="space-around" align="middle"   style={{height: '100%', textAlign: 'center'}}>
-                <Col span={24}>
+                <Col span={24} style={{fontSize: "2rem"}}>
                     <p>{'おつかれ'}</p>
                     <p>{'（●´∀｀）♪'}</p>
                 </Col>
@@ -71,7 +54,7 @@ class CardList extends React.Component  {
             this.handleClick = this.handleClick.bind(this);
             this.onKeyDown = this.onKeyDown.bind(this);
             this.onTurn = this.onTurn.bind(this);
-            this.state = {current: -1, front: true}
+            this.state = {current:  null, front: true}
             this.list = [];
         }
 
@@ -79,8 +62,9 @@ class CardList extends React.Component  {
             // TODO 后台接口需要返回合适的数据格式，前端不调整数据格式
             let datasource = await this.props.list()
             this.list = datasource;
+            console.log(this.list);
             this.setState({
-                current: 0
+                current: this.list.pop()
             })
             document.addEventListener('keydown', this.onKeyDown);
         }
@@ -88,7 +72,7 @@ class CardList extends React.Component  {
         handleClick() {
                 this.setState({
                     front: true,
-                    current: this.state.current + 1
+                    current: this.list.pop()
                 })
         }
 
@@ -112,16 +96,17 @@ class CardList extends React.Component  {
             }
         }
 
-        onRight() {
+        onRight(val) {
             this.handleClick();
         }
 
-        onWrong() {
+        onWrong(val) {
+            this.list.unshift(val);
             this.handleClick();
         }
 
         onTurn() {
-            if (this.state.front && this.state.current < this.list.length) {
+            if (this.state.front && this.state.current != null) {
                 this.setState({
                     front: false
                 })
@@ -129,12 +114,12 @@ class CardList extends React.Component  {
         }
 
         renderCard() {
-            if (this.state.current >= 0 && this.state.current < this.list.length) {
+            if (this.state.current !=null) {
                 return (
                     <Card value={
                         this.state.front ? 
-                        this.props.renderFront(this.list[this.state.current]) :
-                        this.props.renderBack(this.list[this.state.current])
+                        this.props.renderFront(this.state.current) :
+                        this.props.renderBack(this.state.current)
                     } />
                 )
             } else {
@@ -154,10 +139,10 @@ class CardList extends React.Component  {
                         <Col span={24} style={{height:'25%'}}>
                             {this.state.front == false &&
                             <div>
-                                <Button type="danger" onClick={this.handleClick} style={{marginRight: '1rem'}}>
+                                <Button type="danger" onClick={() => this.onWrong(this.state.current)} style={{marginRight: '1rem'}}>
                                     <CaretLeftOutlined /> 记忆错误
                                 </Button>
-                                <Button type="primary" onClick={this.handleClick}>
+                                <Button type="primary" onClick={() => this.onRight(this.state.current)}>
                                     记忆正确<CaretRightOutlined />
                                 </Button>
                             </div>
