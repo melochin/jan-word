@@ -13,3 +13,7 @@ export const list = () => {
 export const remove = (id) => {
     return axios.delete(`${uri}/grammar/${id}`);
 }
+
+export const modify = (values) => {
+    return axios.put(`${uri}/grammar`, values);
+}

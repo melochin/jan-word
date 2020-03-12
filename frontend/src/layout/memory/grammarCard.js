@@ -1,10 +1,10 @@
 import React from 'react';
 import CardList from './card';
-import {list} from '../../action/grammarAction';
+import {list, forget, remeber, finish} from '../../action/gammraCardAction';
 
 const renderFront = (grammar) => {
+    if (grammar.sentences == null) return null;
     let index = parseInt(Math.random() * grammar.sentences.length);
-
     return (
         <p>{grammar.sentences[index].sentence}</p>
     )
@@ -21,7 +21,7 @@ const renderBack = (grammar) => {
 
 const GrammarWord = () => {
     return (
-        <CardList list={list} 
+        <CardList list={list}  remeber={remeber} forget={forget} finish = {finish} 
             renderFront={renderFront} renderBack={renderBack}/>
     )
 }

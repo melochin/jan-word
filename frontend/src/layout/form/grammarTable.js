@@ -1,9 +1,9 @@
-import React from 'react';
+import React, {useState, useEffect} from 'react';
 import { Form, Input, Button, Table, Modal} from 'antd';
 import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
 import TextArea from 'antd/lib/input/TextArea';
-import {add, list, remove} from '../../action/grammarAction';
-import {ModalForm} from './modalForm';
+import {add, list, remove, modify} from '../../action/grammarAction';
+import {ModalForm, useModalForm} from './modalForm';
 
 
 const formItemLayout = {
@@ -23,16 +23,13 @@ const formItemLayoutWithOutLabel = {
   },
 };
 
-export const GrammarForm = ({onSubmit}) => {
+export const GrammarForm = ({form, onSubmit}) => {
   const onFinish = values => {
-    if (values.hasOwnProperty('sentences')) {
-      values.sentences = values.sentences.map( s => ({sentence: s}))
-    }
     onSubmit(values);
   };
 
   return (
-    <Form name="dynamic_form_item" {...formItemLayoutWithOutLabel} onFinish={onFinish}>
+    <Form form={form} name="dynamic_form_item" {...formItemLayoutWithOutLabel} onFinish={onFinish}>
         <Form.Item name="grammar" label="语法" {...formItemLayout}>
             <Input />
         </Form.Item>
@@ -50,8 +47,10 @@ export const GrammarForm = ({onSubmit}) => {
                   required={false}
                   key={field.key}
                 >
+              {console.log(field)}
                   <Form.Item
                     {...field}
+                    name={[field.name, 'sentence']}
                     validateTrigger={['onChange', 'onBlur']}
 
                     rules={[
@@ -101,61 +100,67 @@ export const GrammarForm = ({onSubmit}) => {
 };
 
 
-export class GrammarTable extends React.Component {
+export function GrammarTable () {
 
-  constructor(props) {
-    super(props);
-    this.state = {dataSource: [], visible: false};
-    this.onAdd = this.onAdd.bind(this);
-    this.columns = [{
-        title: '语法',
-        dataIndex: 'grammar',
-        key: 'grammar',
-        render: text => <span>{text}</span>,
-    }, {
-      title: '操作',
-      key: 'opertaion',
-      render: (text, record) => (
-          <span>
-              <Button disabled="disabled" type='primary' style={{marginRight: '5px'}}>修改</Button>
-              <Button type='danger' onClick={() => this.onDelete(record.id)}>删除</Button>
-          </span>
-      )
-    }]
+const modalForm = useModalForm();
+const [dataSource, setDataSource] = useState([]);
+
+useEffect(() => {
+  onList()  
+}, [])
+
+  const columns = [{
+    title: '语法',
+    dataIndex: 'grammar',
+    key: 'grammar',
+    render: text => <span>{text}</span>,
+  }, {
+  title: '操作',
+  key: 'opertaion',
+  render: (text, record) => (
+      <span>
+          <Button type='primary' style={{marginRight: '5px'}} onClick={()=>modalForm.setModify(record)}>修改</Button>
+          <Button type='danger' onClick={() => onDelete(record.id)}>删除</Button>
+      </span>
+  )
+  }]
+
+  const onList = async () => {
+    const dataSource = await list();
+    setDataSource(dataSource);
   }
 
-  componentDidMount() {
-    this.onList();
-  }
+  const onAdd = async (values) => {
+    await add(values);
+    onList();
+    modalForm.onCancel();
+}
 
-  async onList() {
-    let dataSource = await list();
-    this.setState({dataSource});
-  }
+const onModify = async(values, preValues) => {
+  console.log(values);
+    values.id = preValues.id;
+    await modify(values);
+    onList();
+    modalForm.onCancel();
+}
 
-  async onDelete(id) {
-    await remove(id);
-    this.onList();
-  }
+const onDelete = async (id) => {
+    await remove(id)
+    onList();
+}
 
-  async onAdd(value) {
-    await add(value);
-    this.onList();
-    this.setState({
-      visible: false
-    })
-  }
-
-  render() {
-    const {visible} = this.state;
-    return (
-      <div>
-        <Modal visible={visible} onCancel={() => this.setState({visible: false})}>
-          <GrammarForm onSubmit={this.onAdd}/>
-        </Modal>
-        <Button onClick={() => this.setState({visible: true})}>新增</Button>
-        <Table columns={this.columns} dataSource={this.state.dataSource} />
+  return (
+    <div>
+      <div className="table-operations">
+        <Button onClick={modalForm.setAdd}>新增</Button>
+        <ModalForm 
+          {...modalForm}
+          onAdd={onAdd} 
+          onModify={onModify}>
+          {(form) => <GrammarForm {...form} />}
+        </ModalForm>
       </div>
+      <Table columns={columns} dataSource={dataSource} rowKey={record => record.id}/>
+    </div>
     )
-  }
 }
