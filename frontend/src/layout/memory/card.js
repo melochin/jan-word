@@ -32,7 +32,9 @@ class CardList extends React.Component  {
             this.onNextCard = this.onNextCard.bind(this);
             this.onKeyDown = this.onKeyDown.bind(this);
             this.onTurnCard = this.onTurnCard.bind(this);
-            this.state = {current:  null, front: true}
+            this.onForget = this.onForget.bind(this);
+            this.onRemember = this.onRemember.bind(this);
+            this.state = {current:  new Object(), front: true}
             this.list = [];
         }
 
