@@ -40,5 +40,14 @@ public class GrammarController {
 		grammarDao.remove(id);
 	}
 
+	@PutMapping("/grammar")
+	public void modify(@RequestBody Grammar grammar) {
+		grammarDao.update(grammar);
+		List<Sentence> sentences = grammar.getSentences();
+		sentenceDao.remove(grammar.getId());
+		sentences.forEach(s -> sentenceDao.add(
+				s.getSentence(), grammar.getId())
+		);
+	}
 
 }

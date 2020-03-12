@@ -16,4 +16,10 @@ public interface GrammarDao {
 
 	@Delete("delete from grammar where id = #{id}")
 	void remove(@Param("id") int id);
+
+	@Update("update grammar set grammar = #{grammar}, detail = #{detail} where id = #{id}")
+	void update(Grammar grammar);
+
+	@Select("select id, grammar, detail from grammar where id = #{id}")
+	Grammar get(Integer id);
 }

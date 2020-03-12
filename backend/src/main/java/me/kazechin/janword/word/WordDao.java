@@ -1,4 +1,4 @@
-package me.kazechin.janword.mapper;
+package me.kazechin.janword.word;
 
 import me.kazechin.janword.word.Word;
 import org.apache.ibatis.annotations.*;
@@ -19,4 +19,16 @@ public interface WordDao {
 
 	@Update("update word set word=#{word}, gana=#{gana}, chinese=#{chinese} where id=#{id}")
 	void modify(Word word);
+
+	@Select("select word.id, word.word, word.gana, word.chinese from word left join word_remember " +
+			"on word_remember.word_id = word.id " +
+			"and (" +
+			"word_remember.last_date is null or " +
+			"word_remember.last_date < date_sub(now(), INTERVAL 7 DAY) " +
+			")")
+	List<Word> remember();
+
+	@Select("select * from word where id = #{id}")
+	Word get(@Param("id") Integer id);
+
 }

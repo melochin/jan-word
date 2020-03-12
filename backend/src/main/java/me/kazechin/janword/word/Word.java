@@ -10,7 +10,8 @@ public class Word {
 
 	private String chinese;
 
-	public Word() {}
+	public Word() {
+	}
 
 	public Word(String word, String gana, String chinese) {
 		this.word = word;

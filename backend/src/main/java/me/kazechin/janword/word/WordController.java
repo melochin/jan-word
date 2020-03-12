@@ -1,10 +1,12 @@
 package me.kazechin.janword.word;
 
-import me.kazechin.janword.mapper.WordDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Set;
+
+import static java.util.stream.Collectors.toList;
 
 @CrossOrigin
 @RestController
@@ -14,7 +16,7 @@ public class WordController {
 	private WordDao wordDao;
 
 	@GetMapping("/words")
-	List<Word> list() {
+	public List<Word> list() {
 		return wordDao.list();
 	}
 

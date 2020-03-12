@@ -1,9 +1,6 @@
 package me.kazechin.janword.grammar;
 
-import org.apache.ibatis.annotations.Insert;
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.*;
 
 import java.util.List;
 
@@ -15,4 +12,12 @@ public interface SentenceDao {
 
 	@Select("select id,sentence from sentence where grammar_id = #{grammarId}")
 	List<Sentence> list(@Param("grammarId") int grammarId);
+
+	@Update("update sentence set sentence = #{sentence} where id = #{id}")
+	void update(Sentence sentence);
+
+	@Delete("delete from sentence where grammar_id = #{grammar_id}")
+	void remove(int grammarId);
+
+
 }
