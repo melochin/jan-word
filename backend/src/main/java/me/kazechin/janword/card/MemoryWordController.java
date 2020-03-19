@@ -5,20 +5,36 @@ import me.kazechin.janword.word.WordDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Date;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 
 import static java.util.stream.Collectors.toList;
 
 @CrossOrigin
 @RestController
-public class MemoryWordController implements MemoryControllerInter<Word>{
+public class MemoryWordController implements MemoryControllerInter<Word> {
 
-	@Autowired
 	private WordDao wordDao;
 
-	@Autowired
 	private MemoryCache memoryCache;
+
+	private MemoryDao memoryDao;
+
+	private MermoryRecordDao mermoryRecordDao;
+
+	private static int limit = 30;
+
+	@Autowired
+	public MemoryWordController(WordDao wordDao,
+								MemoryCache memoryCache,
+								MemoryDao memoryDao,
+								MermoryRecordDao mermoryRecordDao) {
+		this.wordDao = wordDao;
+		this.memoryCache = memoryCache;
+		this.memoryDao = memoryDao;
+		this.mermoryRecordDao = mermoryRecordDao;
+	}
 
 	@GetMapping("/card/words")
 	@Override
@@ -33,7 +49,8 @@ public class MemoryWordController implements MemoryControllerInter<Word>{
 					.collect(toList());
 		}
 
-		List<Word> words = wordDao.remember();
+		List<Word> words = wordDao.remember(limit);
+
 		memoryCache.put(
 				MemoryCache.keyWord(userId),
 				words.stream().map(word -> word.getId())
@@ -45,10 +62,30 @@ public class MemoryWordController implements MemoryControllerInter<Word>{
 	@Override
 	public void finish(Integer userId) {
 		userId = 0;
-		Set<Integer> set = memoryCache.list(MemoryCache.keyWord(userId));
-		if (set.size() > 0) {
-			// TODO update date
+
+		handleMemoryCache(userId);
+
+		MemoryRecord memoryRecord = mermoryRecordDao.get(userId, new Date());
+		if (memoryRecord == null) {
+			mermoryRecordDao.add(new MemoryRecord(userId, new Date(), 1));
+		} else {
+			memoryRecord.increTimes();
+			mermoryRecordDao.modify(memoryRecord);
 		}
+
+	}
+
+	private void handleMemoryCache(Integer userId) {
+		Map<String, TempMemory> map = memoryCache.get(MemoryCache.keyWord(userId));
+
+		for(Map.Entry<String,TempMemory> entry : map.entrySet()) {
+			int wordId = Integer.valueOf(entry.getKey());
+
+			if (memoryDao.modifyLastDate(wordId, entry.getValue().isWrong()) == 0) {
+				memoryDao.add(wordId, entry.getValue().isWrong());
+			}
+		}
+
 		memoryCache.remove(MemoryCache.keyWord(userId));
 	}
 

@@ -1,6 +1,7 @@
 package me.kazechin.janword.card;
 
 import org.springframework.data.redis.core.HashOperations;
+import org.springframework.data.redis.core.SetOperations;
 import org.springframework.stereotype.Repository;
 
 import javax.annotation.Resource;
@@ -15,12 +16,16 @@ import static java.util.stream.Collectors.toSet;
 public class MemoryCache {
 
 	@Resource(name = "redisTemplate")
-	private HashOperations<String, String, Integer> hashOps;
+	private HashOperations<String, String, TempMemory> hashOps;
 
 	public void put(String key, List<Integer> idList) {
 		for (int id : idList) {
-			hashOps.put(key, String.valueOf(id), 0);
+			hashOps.put(key, String.valueOf(id), new TempMemory());
 		}
+	}
+
+	public Map<String, TempMemory> get(String key) {
+		return hashOps.entries(key);
 	}
 
 	public Set<Integer> list(String key) {
@@ -38,11 +43,11 @@ public class MemoryCache {
 
 	public List<Integer> needRemeberList(String key) {
 		List<Integer> result = new ArrayList<>();
-		Map<String, Integer> map = hashOps.entries(key);
+		Map<String, TempMemory> map = hashOps.entries(key);
 		if (map.isEmpty()) return null;
 
-		for (Map.Entry<String, Integer> entry : map.entrySet()) {
-			if (entry.getValue() < 2) {
+		for (Map.Entry<String, TempMemory> entry : map.entrySet()) {
+			if (entry.getValue().getRight() < 2) {
 				result.add(Integer.valueOf(entry.getKey()));
 			}
 		}
@@ -52,13 +57,17 @@ public class MemoryCache {
 
 
 	public int remeber(String key, int id) {
-		Integer count = hashOps.get(key, String.valueOf(id));
-		hashOps.put(key, String.valueOf(id), count + 1);
-		return count + 1;
+		TempMemory tempMemory = hashOps.get(key, String.valueOf(id));
+		tempMemory.setRight(tempMemory.getRight() + 1);
+		hashOps.put(key, String.valueOf(id), tempMemory);
+		return tempMemory.getRight();
 	}
 
 	public void forget(String key, int id) {
-		hashOps.put(key, String.valueOf(id), 0);
+		TempMemory tempMemory = hashOps.get(key, String.valueOf(id));
+		tempMemory.setWrong(true);
+		tempMemory.setRight(0);
+		hashOps.put(key, String.valueOf(id), tempMemory);
 	}
 
 	public static String keyWord(int userId) {

@@ -5,6 +5,7 @@ import me.kazechin.janword.grammar.GrammarDao;
 import me.kazechin.janword.grammar.SentenceDao;
 import me.kazechin.janword.word.Word;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -33,6 +34,7 @@ public class MemoryGrammarController implements MemoryControllerInter<Grammar> {
 	 */
 	@GetMapping("/card/grammars")
 	public List<Grammar> list(Integer userId) {
+
 		userId = 0;
 
 		List<Integer> grammarIdList = memoryCache.needRemeberList(MemoryCache.keyGrammar(userId));
