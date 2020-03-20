@@ -1,8 +1,12 @@
 package me.kazechin.janword.word;
 
+import me.kazechin.janword.user.UserInfo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.List;
 import java.util.Set;
 
@@ -16,7 +20,7 @@ public class WordController {
 	private WordDao wordDao;
 
 	@GetMapping("/words")
-	public List<Word> list() {
+	public List<Word> list(@AuthenticationPrincipal UserInfo user) {
 		return wordDao.list();
 	}
 

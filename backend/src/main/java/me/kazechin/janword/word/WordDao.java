@@ -25,8 +25,9 @@ public interface WordDao {
 			"and (" +
 			"word_remember.last_date is null or " +
 			"word_remember.last_date < date_sub(now(), INTERVAL 7 DAY) " +
-			")")
-	List<Word> remember();
+			") order by word_remember.last_date asc " +
+			" limit #{limit}")
+	List<Word> remember(int limit);
 
 	@Select("select * from word where id = #{id}")
 	Word get(@Param("id") Integer id);
