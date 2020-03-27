@@ -42,3 +42,31 @@
 .content {
   min-height: 280px;
 }
+
+#root {
+  height: 100%;
+}
+
+code {
+  background: #f3f5f4;
+  color: #f15757;
+  border-radius: 1px;
+  box-shadow: 0 0 2px grey ;
+}
+
+@media screen and (max-width: 500px) {
+  html {
+      font-size: 12px;
+  }
+}
+
+
+#content {
+  min-height: 300px;
+}
+
+@media screen and (max-height: 704px) {
+  #content {
+    min-height: 450px;
+  }
+}

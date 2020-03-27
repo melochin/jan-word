@@ -1,7 +1,7 @@
 import React, {useState, useEffect} from 'react';
 import { Form, Modal } from 'antd';
 
-export const ModalForm = ({visible, onAdd, onModify, onCancel, children, initialValues, mode}) => {
+export const ModalForm = ({visible, onAdd, onModify, onCancel, children, initialValues, mode, width}) => {
 
     const [form] = Form.useForm();
 
@@ -28,6 +28,7 @@ export const ModalForm = ({visible, onAdd, onModify, onCancel, children, initial
 
     return (
         <Modal
+            width={width}
             visible={visible}
             title={title}
             okText='Submit'

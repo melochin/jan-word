@@ -5,7 +5,7 @@ import { CaretLeftOutlined, CaretRightOutlined } from '@ant-design/icons';
 const Card = ({value}) => {
     return (
         <Row justify="space-around" align="middle"  style={{height: '100%', textAlign: 'center'}}>
-            <Col span={24} style={{fontSize: "2rem"}}>
+            <Col span={24} style={{fontSize: "1.5rem"}}>
                 {value}
             </Col>
         </Row>
@@ -15,8 +15,8 @@ const Card = ({value}) => {
 const EndCard = () => {
     const ele = (
         <div>
-                    <p>{'おつかれ'}</p>
-                    <p>{'（●´∀｀）♪'}</p>
+                <p>{'おつかれ'}</p>
+                <p>{'（●´∀｀）♪'}</p>
         </div>
     )
     return (<Card value={ele} />);
@@ -34,23 +34,26 @@ class CardList extends React.Component  {
             this.onTurnCard = this.onTurnCard.bind(this);
             this.onForget = this.onForget.bind(this);
             this.onRemember = this.onRemember.bind(this);
-            this.state = {current:  new Object(), front: true}
+            this.state = {current:  new Object(), front: true, start: false, count: 0, countRemember: 0}
             this.list = [];
+            this.finish = false;
         }
 
         async componentDidMount() {
-            let datasource = await this.props.list()
-            this.list = datasource;
-            
+            let data = await this.props.list()
+            this.list = data.datasource;
             this.setState({
-                current: this.list.pop()
+                current: this.list != null ? this.list.pop() : null,
+                count: data.count,
+                countRemember: data.countRemember
             })
             document.addEventListener('keydown', this.onKeyDown);
         }
 
         async onNextCard() {
                 let current = this.list.pop();
-                if (current == null) {
+                if (current == null && this.finish == false)   {
+                    this.finish = true;
                     await this.props.finish();
                 }
                 this.setState({
@@ -64,6 +67,7 @@ class CardList extends React.Component  {
          * @param {*} e 
          */
         onKeyDown(e) {
+            if (this.state.start == false) return;
             switch(e.keyCode) {
                 case 37:
                     if (this.state.front == false) {
@@ -120,25 +124,38 @@ class CardList extends React.Component  {
             }
         }
 
+        renderStart() {
+            return (
+                <React.Fragment>
+                {this.props.renderStart(this.state.count, this.state.countRemember)}
+                {
+                    this.state.countRemember  < this.state.count &&
+                    <Button type="primary" onClick={() => this.setState({start:true})}>开始</Button>
+                }
+                </React.Fragment>
+            )
+        }
+
         render() {
             return (
                 <Row style={{height: '100%'}}   justify="space-around" align="middle" onClick={this.onTurnCard} >
                     <Col span={2}></Col>
                     <Col span={20} align="middle" style={{height: '100%'}}>
                         <Col span={24} style={{height: '25%'}}></Col>
+
                         <Col span={24} style={{height:'50%'}} >
-                            {this.renderCard()}
+                            {this.state.start == false ? this.renderStart() : this.renderCard()}
                         </Col>
-                        <Col span={24} style={{height:'25%'}}>
+                        <Col span={24} style={{height:'25%'}}  >
                             {this.state.front == false &&
-                            <div>
+                            <React.Fragment>
                                 <Button type="danger" onClick={this.onForget} style={{marginRight: '1rem'}}>
-                                    <CaretLeftOutlined /> 记得
+                                    <CaretLeftOutlined /> 忘记
                                 </Button>
                                 <Button type="primary" onClick={this.onRemember}>
-                                    忘记<CaretRightOutlined />
+                                    记得 <CaretRightOutlined />
                                 </Button>
-                            </div>
+                            </React.Fragment>
                             }
                         </Col>
                     </Col>

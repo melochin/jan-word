@@ -1,5 +1,34 @@
 import axios from 'axios';
-import {uri} from './config.js';
+import {uri} from './config.js'
+import {getToken} from './userAction';
+
+axios.interceptors.request.use(
+    config => {
+        const token = getToken();
+        if (token != null) {
+            config.headers.token = token;
+        }
+        return config;
+    },
+)
+
+axios.interceptors.response.use(
+    response => response,
+    error => {
+        const status = error.response.status;
+        if (status == 403) {
+            error.message = '请登录';
+            window.location.href = "/login";
+            return Promise.reject(error);
+        }
+        if (error.message == 'Network Error') {
+            error.message = '服务器故障'
+            return Promise.reject(error);
+        } else {
+            return error;
+        }
+    }
+)
 
 export const list = () => {
     return axios.get(`${uri}/card/words`)

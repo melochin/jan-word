@@ -109,21 +109,24 @@ useEffect(() => {
   onList()  
 }, [])
 
-  const columns = [{
-    title: '语法',
-    dataIndex: 'grammar',
-    key: 'grammar',
-    render: text => <span>{text}</span>,
-  }, {
-  title: '操作',
-  key: 'opertaion',
-  render: (text, record) => (
-      <span>
-          <Button type='primary' style={{marginRight: '5px'}} onClick={()=>modalForm.setModify(record)}>修改</Button>
-          <Button type='danger' onClick={() => onDelete(record.id)}>删除</Button>
-      </span>
-  )
-  }]
+  const columns = [
+    {
+      title: '语法',
+      dataIndex: 'grammar',
+      key: 'grammar',
+      render: text => <span>{text}</span>,
+    }, 
+    {
+      title: '操作',
+      key: 'opertaion',
+      render: (text, record) => (
+          <span>
+              <Button type='primary' style={{marginRight: '5px'}} onClick={()=>modalForm.setModify(record)}>修改</Button>
+              <Button type='danger' onClick={() => onDelete(record.id)}>删除</Button>
+          </span>
+      )
+    }
+  ]
 
   const onList = async () => {
     const dataSource = await list();

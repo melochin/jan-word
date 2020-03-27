@@ -1,5 +1,5 @@
 import axios from 'axios';
-import {uri} from './config.js';
+import {uri} from './config.js'
 let data = [
     {
         id: 1,

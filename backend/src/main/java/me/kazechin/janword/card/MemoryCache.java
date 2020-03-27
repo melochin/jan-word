@@ -1,7 +1,6 @@
 package me.kazechin.janword.card;
 
 import org.springframework.data.redis.core.HashOperations;
-import org.springframework.data.redis.core.SetOperations;
 import org.springframework.stereotype.Repository;
 
 import javax.annotation.Resource;
@@ -9,9 +8,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import static java.util.stream.Collectors.toSet;
 
+/**
+ * 缓存操作：
+ * 缓存正在记忆中的单词ID或者语法ID
+ */
 @Repository
 public class MemoryCache {
 
@@ -22,6 +26,7 @@ public class MemoryCache {
 		for (int id : idList) {
 			hashOps.put(key, String.valueOf(id), new TempMemory());
 		}
+		hashOps.getOperations().expire(key, 1, TimeUnit.DAYS);
 	}
 
 	public Map<String, TempMemory> get(String key) {

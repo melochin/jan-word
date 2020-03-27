@@ -1,5 +1,5 @@
 import axios from 'axios';
-import {uri} from './config';
+import {uri} from './config.js'
 
 export const add = (values) => {
     return axios.post(`${uri}/grammar`, values);

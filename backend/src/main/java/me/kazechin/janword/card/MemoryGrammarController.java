@@ -3,28 +3,38 @@ package me.kazechin.janword.card;
 import me.kazechin.janword.grammar.Grammar;
 import me.kazechin.janword.grammar.GrammarDao;
 import me.kazechin.janword.grammar.SentenceDao;
+import me.kazechin.janword.user.UserInfo;
 import me.kazechin.janword.word.Word;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static java.util.stream.Collectors.toList;
 
 @CrossOrigin
 @RestController
-public class MemoryGrammarController implements MemoryControllerInter<Grammar> {
+public class MemoryGrammarController implements MemoryControllerInter {
 
-	@Autowired
 	private MemoryCache memoryCache;
 
-	@Autowired
 	private GrammarDao grammarDao;
 
-	@Autowired
 	private SentenceDao sentenceDao;
+
+	private MemoryRecordDao memoryRecordDao;
+
+	@Autowired
+	public MemoryGrammarController(MemoryCache memoryCache,
+								   GrammarDao grammarDao,
+								   SentenceDao sentenceDao,
+								   MemoryRecordDao memoryRecordDao) {
+		this.memoryCache = memoryCache;
+		this.grammarDao = grammarDao;
+		this.sentenceDao = sentenceDao;
+		this.memoryRecordDao = memoryRecordDao;
+	}
 
 
 	/**
@@ -33,10 +43,22 @@ public class MemoryGrammarController implements MemoryControllerInter<Grammar> {
 	 * @return
 	 */
 	@GetMapping("/card/grammars")
-	public List<Grammar> list(Integer userId) {
+	public Map<String, Object> list(@AuthenticationPrincipal UserInfo user) {
 
-		userId = 0;
+		int userId = user.getUserId();
 
+		Map<String, Object> res = new HashMap<>();
+
+		List<Grammar> grammars = getGrammars(userId);
+		res.put("datasource", grammars);
+		res.put("countRemember", 0);
+		res.put("count", 1);
+
+		return res;
+
+	}
+
+	private List<Grammar> getGrammars(int userId) {
 		List<Integer> grammarIdList = memoryCache.needRemeberList(MemoryCache.keyGrammar(userId));
 		if (grammarIdList != null) {
 			return grammarIdList.stream()
@@ -64,26 +86,29 @@ public class MemoryGrammarController implements MemoryControllerInter<Grammar> {
 
 	@PostMapping("/card/grammar/finish")
 	@Override
-	public void finish(Integer userId) {
-		userId = 0;
+	public void finish(@AuthenticationPrincipal UserInfo user) {
+		int userId = user.getUserId();
 		Set<Integer> set = memoryCache.list(MemoryCache.keyGrammar(userId));
 		if (set.size() > 0) {
 			// TODO update date
 		}
+
+		memoryRecordDao.add(new MemoryRecord(userId, new Date(), "完成语法 " + set.size() + " 个"));
+
 		memoryCache.remove(MemoryCache.keyGrammar(userId));
 	}
 
 	@PatchMapping("/card/grammar/remeber/{id}")
-	public boolean remember(Integer userId, @PathVariable Integer id) {
-		userId = 0;
+	public boolean remember(@AuthenticationPrincipal UserInfo user, @PathVariable Integer id) {
+		int userId = user.getUserId();
 		return memoryCache.remeber(MemoryCache.keyGrammar(userId), id) >= 2;
 	}
 
 
 	@PatchMapping("/card/grammar/forget/{id}")
 	@Override
-	public void forget(Integer userId, @PathVariable Integer id) {
-		userId = 0;
+	public void forget(@AuthenticationPrincipal UserInfo user, @PathVariable Integer id) {
+		int userId = user.getUserId();
 		memoryCache.forget(MemoryCache.keyGrammar(userId), id);
 	}
 

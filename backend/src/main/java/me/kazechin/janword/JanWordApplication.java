@@ -1,6 +1,7 @@
 package me.kazechin.janword;
 
 import com.fasterxml.jackson.databind.ser.std.StringSerializer;
+import me.kazechin.janword.extra.weblio.Weblio;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
@@ -31,10 +32,20 @@ public class JanWordApplication implements WebMvcConfigurer {
 	@Value("${spring.redis.host}")
 	private String hostName;
 
+	@Value("${spring.redis.password}")
+	private String password;
+
 	@Bean
 	public JedisConnectionFactory redisConnectionFactory() {
+		// TODO 为什么没有加载配置？还需要自己给值
 		RedisStandaloneConfiguration config = new RedisStandaloneConfiguration(hostName, 6379);
+		config.setPassword(password);
 		return new JedisConnectionFactory(config);
+	}
+
+	@Bean
+	public Weblio weblio() {
+		return new Weblio();
 	}
 
 	@Bean

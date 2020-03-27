@@ -1,35 +1,72 @@
 import React, {useState, useEffect}from 'react';
-import { Form, Input, Button } from 'antd';
+import { Form, Input, Button, Popover, Row, Col, List } from 'antd';
 import { Table } from 'antd';
 import {ModalForm, useModalForm} from './modalForm';
 import {add, remove, list, modify} from '../../action/wordAction.js';
+import weblio from '../../action/weblioAction.js';
+import { visible } from 'ansi-colors';
 
 const layout = {
     labelCol: { span: 6 },
     wrapperCol: { span: 12 },
   };
-
+  
 const WordForm = ({form, onSubmit}) => {
+
+    const [visible, setVisible] = useState(false);
+    const [content, setContent] = useState([]);
+
+    const onSearch = (e,val ) => {
+        setVisible(true);
+        weblio.getMeanings(form.getFieldValue('word'))
+            .then(list => {
+                setContent(list);
+            });
+    }
+
     return (
-        <Form form={form} onFinish={onSubmit} {...layout}>
-            {items}
-        </Form>
+        <Row>
+            <Col span={12}>
+            <Form form={form} onFinish={(values) => {
+                onSubmit(values)
+                setVisible(false);
+            }} {...layout}>
+                <Form.Item name="word" label="日语" 
+                    validateTrigger={['onChange', 'onBlur']}
+                    rules={[
+                        {
+                            required: true,
+                            message: '请输入日语'
+                        }, 
+                        ({getFieldValue}) => ( {
+                            validator: async (rule, value) => {
+                                onSearch(value);
+                            },
+                            validateTrigger: 'onBlur'
+                        })
+                    ]}>
+                        <Input/>
+                </Form.Item>
+                {items}
+            </Form>
+            </Col>
+            <Col span={12}>
+                <List
+                bordered
+                dataSource={content}
+                renderItem={item => (
+                <List.Item>
+                    {item}
+                </List.Item>
+                )}
+                />
+            </Col>
+        </Row>
     )
 }
 
 const items = [
     (
-        <Form.Item name="word" label="日语"
-            rules={[
-                {
-                    required: true,
-                    message: '请输入日语'
-                },
-            ]}
-        >
-        <Input />
-    </Form.Item>
-    ), (
         <Form.Item name="gana" label="假名">
             <Input />
         </Form.Item>
@@ -43,6 +80,11 @@ const items = [
                 },
             ]}
         >
+            <Input />
+        </Form.Item>
+    ),
+    (
+        <Form.Item name="origin" label="来源">
             <Input />
         </Form.Item>
     ),
@@ -81,6 +123,12 @@ export function WordTable() {
             dataIndex: 'chinese',
             key: 'chinese',
             render: text => <span>{text}</span>,
+          },
+          {
+              title: '来源',
+              dataIndex: 'origin',
+              key:'origin',
+              render: text => <span>{text}</span>,
           },
           {
               title: '操作',
@@ -124,6 +172,7 @@ export function WordTable() {
             <div className="table-operations">
                 <Button onClick={modalForm.setAdd}>新增</Button>
                 <ModalForm 
+                    width={800}
                     {...modalForm}
                     onAdd={onAdd} 
                     onModify={onModify}>
