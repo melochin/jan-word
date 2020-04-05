@@ -5,7 +5,14 @@ export const add = (values) => {
     return axios.post(`${uri}/grammar`, values);
 }
 
-export const list = () => {
+export const list = (params) => {
+    if (params != undefined && params != null ) {
+        return axios.get(`${uri}/grammars`, {
+            params: params
+        })
+        .then(response => response.data);    
+    }
+
     return axios.get(`${uri}/grammars`)
         .then(response => response.data);
 }

@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @CrossOrigin
@@ -29,8 +30,16 @@ public class GrammarController {
 	}
 
 	@GetMapping("/grammars")
-	public List<Grammar> list() {
-		List<Grammar> grammars = grammarDao.list();
+	public List<Grammar> list(@RequestParam(name="keyword", required = false) String keyword) {
+
+		List<Grammar> grammars;
+
+		if (keyword != null) {
+			grammars = grammarDao.listByKeyword(keyword);
+		} else {
+			grammars = grammarDao.list();
+		}
+
 		grammars.forEach(g -> g.setSentences(sentenceDao.list(g.getId())));
 		return grammars;
 	}

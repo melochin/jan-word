@@ -14,6 +14,9 @@ public interface GrammarDao {
 	@Select("select id, grammar, detail from grammar")
 	List<Grammar> list();
 
+	@Select("select id, grammar, detail from grammar where grammar like concat('%', #{keyword}, '%')")
+	List<Grammar> listByKeyword(@Param("keyword") String keyword);
+
 	@Delete("delete from grammar where id = #{id}")
 	void remove(@Param("id") int id);
 

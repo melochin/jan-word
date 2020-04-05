@@ -170,7 +170,9 @@ export function WordTable() {
       return (
         <div>
             <div className="table-operations">
-                <Button onClick={modalForm.setAdd}>新增</Button>
+                <Row style={{marginBottom: "10px"}}>
+                    <Button onClick={modalForm.setAdd}>新增</Button>
+                </Row>
                 <ModalForm 
                     width={800}
                     {...modalForm}

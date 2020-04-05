@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from 'react';
-import { Form, Input, Button, Table, Modal} from 'antd';
+import { Row, Col, Form, Input, Button, Table, Modal} from 'antd';
 import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
 import TextArea from 'antd/lib/input/TextArea';
 import {add, list, remove, modify} from '../../action/grammarAction';
@@ -99,15 +99,33 @@ export const GrammarForm = ({form, onSubmit}) => {
   );
 };
 
+const Filter = ({onList}) => {
+
+const submit = (vals) => {
+  vals.keyword == '' ? onList() : onList(vals);
+}
+
+  return (
+    <Form layout='inline'  onFinish={submit}>
+      <Form.Item name="keyword" label="语法">
+        <Input />
+      </Form.Item>
+      <Form.Item>
+        <Button  type="primary" htmlType="submit">检索</Button>
+      </Form.Item>
+  </Form>
+  )
+}
+
 
 export function GrammarTable () {
 
-const modalForm = useModalForm();
-const [dataSource, setDataSource] = useState([]);
+  const modalForm = useModalForm();
+  const [dataSource, setDataSource] = useState([]);
 
-useEffect(() => {
-  onList()  
-}, [])
+  useEffect(() => {
+    onList()  
+  }, [])
 
   const columns = [
     {
@@ -128,8 +146,8 @@ useEffect(() => {
     }
   ]
 
-  const onList = async () => {
-    const dataSource = await list();
+  const onList = async (params) => {
+    const dataSource = await list(params);
     setDataSource(dataSource);
   }
 
@@ -155,7 +173,14 @@ const onDelete = async (id) => {
   return (
     <div>
       <div className="table-operations">
-        <Button onClick={modalForm.setAdd}>新增</Button>
+        <Row style={{marginBottom: "10px"}}>
+          <Col flex={2}>
+              <Button onClick={modalForm.setAdd}>新增</Button>  
+          </Col>
+          <Col justify='right' flex={2}>
+            <Filter onList={onList}/>
+          </Col>
+        </Row>
         <ModalForm 
           {...modalForm}
           onAdd={onAdd} 

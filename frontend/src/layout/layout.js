@@ -124,7 +124,7 @@ function Main(props) {
               </Breadcrumb> */}
               <Layout className="site-layout-background" style={{ padding: '1rem 0' }}>
                 {withRouter(SiderMenu)(props)}
-                <Content id="content" style={{ margin:'0 10px', padding: '0 24px', backgroundColor: 'white' }} >
+                <Content id="content" style={{ margin:'0 10px', padding: '24px 24px', backgroundColor: 'white' }} >
                   <Switch>
                     <Route exact path="/card/word">
                       <WordCard/>
