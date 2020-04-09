@@ -14,18 +14,27 @@ import static java.util.stream.Collectors.toList;
 
 @CrossOrigin
 @RestController
-public class Kuromoji {
+public class KuromojiController {
 
 	private KuromojiService service;
 
 	@Autowired
-	public Kuromoji(KuromojiService service) {
+	public KuromojiController(KuromojiService service) {
 		this.service = service;
 	}
 
+	/**
+	 * 返回每个单词的读音
+	 * 比如：パンを食べます
+	 * 返回：
+	 * [パン, ],[を, ],[食べ, たべ],[ます, ]
+	 *
+	 * @param word
+	 * @return
+	 */
 	@GetMapping("/kuromoji/reading/{word}")
 	public List<String[]> reading(@PathVariable("word") String word) {
-		return service.getReadings(word, true);
+		return service.getReadings(word);
 	}
 
 }

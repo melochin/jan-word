@@ -1,10 +1,11 @@
 package me.kazechin.janword.card;
 
+import me.kazechin.janword.extra.kuromoji.KuromojiService;
 import me.kazechin.janword.grammar.Grammar;
 import me.kazechin.janword.grammar.GrammarDao;
+import me.kazechin.janword.grammar.Sentence;
 import me.kazechin.janword.grammar.SentenceDao;
 import me.kazechin.janword.user.UserInfo;
-import me.kazechin.janword.word.Word;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -25,15 +26,23 @@ public class MemoryGrammarController implements MemoryControllerInter {
 
 	private MemoryRecordDao memoryRecordDao;
 
+	private KuromojiService kuromojiService;
+
+	private MemoryDetailDao memoryDetailDao;
+
 	@Autowired
 	public MemoryGrammarController(MemoryCache memoryCache,
 								   GrammarDao grammarDao,
 								   SentenceDao sentenceDao,
-								   MemoryRecordDao memoryRecordDao) {
+								   MemoryRecordDao memoryRecordDao,
+								   KuromojiService kuromojiService,
+								   MemoryDetailDao memoryDetailDao) {
 		this.memoryCache = memoryCache;
 		this.grammarDao = grammarDao;
 		this.sentenceDao = sentenceDao;
 		this.memoryRecordDao = memoryRecordDao;
+		this.kuromojiService = kuromojiService;
+		this.memoryDetailDao = memoryDetailDao;
 	}
 
 
@@ -50,24 +59,39 @@ public class MemoryGrammarController implements MemoryControllerInter {
 		Map<String, Object> res = new HashMap<>();
 
 		List<Grammar> grammars = getGrammars(userId);
+
+		for(Grammar grammar : grammars) {
+			for(Sentence sentence : grammar.getSentences()) {
+				sentence.setReadings(kuromojiService.getReadings(sentence.getSentence()));
+			}
+		}
+
 		res.put("datasource", grammars);
 		res.put("countRemember", 0);
 		res.put("count", 1);
 
 		return res;
-
 	}
 
 	private List<Grammar> getGrammars(int userId) {
+
+		List<Grammar> grammars;
+
 		List<Integer> grammarIdList = memoryCache.needRemeberList(MemoryCache.keyGrammar(userId));
 		if (grammarIdList != null) {
-			return grammarIdList.stream()
+			grammars = grammarIdList.stream()
 					.map(id -> getGrammar(id))
 					.filter(grammar -> grammar != null)
 					.collect(toList());
+			// 删除缓存
+			if (grammars.size() == 0) {
+				memoryCache.remove(MemoryCache.keyGrammar(userId));
+			}
+
+			return grammars;
 		}
 
-		List<Grammar> grammars = grammarDao.list();
+		grammars = grammarDao.list();
 		grammars.forEach(g -> g.setSentences(sentenceDao.list(g.getId())));
 
 		memoryCache.put(
@@ -88,15 +112,30 @@ public class MemoryGrammarController implements MemoryControllerInter {
 	@Override
 	public void finish(@AuthenticationPrincipal UserInfo user) {
 		int userId = user.getUserId();
-		Set<Integer> set = memoryCache.list(MemoryCache.keyGrammar(userId));
-		if (set.size() > 0) {
-			// TODO update date
-		}
+		int count = handleMemoryCache(userId);
 
-		memoryRecordDao.add(new MemoryRecord(userId, new Date(), "完成语法 " + set.size() + " 个"));
+		memoryRecordDao.add(new MemoryRecord(userId, new Date(), "完成语法 " + count + " 个"));
 
 		memoryCache.remove(MemoryCache.keyGrammar(userId));
 	}
+
+	private int handleMemoryCache(Integer userId) {
+		Map<String, TempMemory> map = memoryCache.get(MemoryCache.keyGrammar(userId));
+
+		int count = map.entrySet().size();
+		for(Map.Entry<String,TempMemory> entry : map.entrySet()) {
+			int grammarId = Integer.valueOf(entry.getKey());
+
+			if (memoryDetailDao.modifyLastDate(userId, grammarId, 1, entry.getValue().isWrong()) == 0) {
+				memoryDetailDao.add(userId, grammarId, 1, entry.getValue().isWrong());
+			}
+		}
+
+		memoryCache.remove(MemoryCache.keyGrammar(userId));
+
+		return count;
+	}
+
 
 	@PatchMapping("/card/grammar/remeber/{id}")
 	public boolean remember(@AuthenticationPrincipal UserInfo user, @PathVariable Integer id) {

@@ -20,16 +20,16 @@ public interface WordDao {
 	void modify(Word word);
 
 	@Select("select * from word where id not in (\n" +
-			"\tselect word_id from word_remember where user_id = #{userId}\n" +
+			"\tselect object_id from memory_detail where user_id = #{userId} and type_no = 0 \n" +
 			") limit #{limit};")
 	List<Word> rememberNew(@Param("userId") int userId, @Param("limit") int limit);
 
 	@Select("select * from word where id in (\n" +
 			"\tselect * from (\n" +
-			"\t\tselect word.id from word left join word_remember \n" +
-			"\t\t\ton word.id= word_remember.word_id\n" +
-			"            where word_remember.user_id = #{userId} \n" +
-			"\t\t\t\tand word_remember.last_date < DATE_SUB(NOW(), INTERVAL 7 DAY) \n" +
+			"\t\tselect word.id from word left join memory_detail \n" +
+			"\t\t\ton word.id= memory_detail.object_id\n" +
+			"            where memory_detail.user_id = #{userId} and type_no =0 \n" +
+			"\t\t\t\tand memory_detail.last_date < DATE_SUB(NOW(), INTERVAL 7 DAY) \n" +
 			"\t\t\tlimit #{limit}\n" +
 			"    ) as a\n" +
 			") \n" +
@@ -38,10 +38,10 @@ public interface WordDao {
 
 	@Select("select * from word where id in (\n" +
 			"\tselect * from (\n" +
-			"\t\tselect word.id from word left join word_remember \n" +
-			"\t\t\ton word.id= word_remember.word_id\n" +
-			"            where word_remember.user_id = #{userId} \n" +
-			"\t\t\t\tand word_remember.correct / (word_remember.correct + word_remember.wrong) < 0.85\n" +
+			"\t\tselect word.id from word left join memory_detail \n" +
+			"\t\t\ton word.id= memory_detail.object_id\n" +
+			"            where memory_detail.user_id = #{userId} and type_no = 0 \n" +
+			"\t\t\t\tand memory_detail.correct / (memory_detail.correct + memory_detail.wrong) < 0.85\n" +
 			"\t\t\tlimit #{limit}\n" +
 			"    ) as a\n" +
 			") ")
@@ -49,10 +49,10 @@ public interface WordDao {
 
 	@Select("select * from word where id in (\n" +
 			"\tselect * from (\n" +
-			"\t\tselect word.id from word left join word_remember \n" +
-			"\t\t\ton word.id= word_remember.word_id\n" +
-			"            where word_remember.user_id = #{userId} \n" +
-			"\t\t\t\tand (word_remember.correct + word_remember.wrong) < 3\n" +
+			"\t\tselect word.id from word left join memory_detail \n" +
+			"\t\t\ton word.id= memory_detail.object_id\n" +
+			"            where memory_detail.user_id = #{userId} and type_no = 0 \n" +
+			"\t\t\t\tand (memory_detail.correct + memory_detail.wrong) < 3\n" +
 			"\t\t\tlimit #{limit}\n" +
 			"    ) as a\n" +
 			") \n"
@@ -62,8 +62,10 @@ public interface WordDao {
 	@Select("select count(*) from word")
 	int count();
 
-	@Select("select count(*) from word_remember where (wrong + correct) >= 3 and correct / (wrong + correct) >= 0.85")
-	int countRemember();
+	@Select("select count(*) from memory_detail " +
+			" where user_id = #{userId} and type_no = 0 and " +
+			"(wrong + correct) >= 3 and correct / (wrong + correct) >= 0.85")
+	int countRemember(@Param("userId") int userId);
 
 	@Select("select * from word where id = #{id}")
 	Word get(@Param("id") Integer id);

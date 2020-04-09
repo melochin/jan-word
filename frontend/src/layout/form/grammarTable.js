@@ -5,6 +5,7 @@ import TextArea from 'antd/lib/input/TextArea';
 import {add, list, remove, modify} from '../../action/grammarAction';
 import {ModalForm, useModalForm} from './modalForm';
 
+const { confirm } = Modal;
 
 const formItemLayout = {
   labelCol: {
@@ -140,7 +141,7 @@ export function GrammarTable () {
       render: (text, record) => (
           <span>
               <Button type='primary' style={{marginRight: '5px'}} onClick={()=>modalForm.setModify(record)}>修改</Button>
-              <Button type='danger' onClick={() => onDelete(record.id)}>删除</Button>
+              <Button type='danger' onClick={() => handleConfirm(() => onDelete(record.id))}>删除</Button>
           </span>
       )
     }
@@ -191,4 +192,19 @@ const onDelete = async (id) => {
       <Table columns={columns} dataSource={dataSource} rowKey={record => record.id}/>
     </div>
     )
+}
+
+const handleConfirm = (deleFunc) => {
+  confirm({
+    title: '确认删除?',
+    okText: 'Yes',
+    okType: 'danger',
+    cancelText: 'No',
+    onOk() {
+      deleFunc();
+    },
+    onCancel() {
+  
+    },
+  });
 }

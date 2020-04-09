@@ -2,6 +2,7 @@ package me.kazechin.janword.card;
 
 import org.apache.ibatis.annotations.*;
 
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -21,8 +22,8 @@ public interface MemoryRecordDao {
 			"memory_date <= #{end} and user_id = #{userId} " +
 			"group by date(memory_date)")
 	List<Map> groupByUserIdAndDate(@Param("userId") int userId,
-												   @Param("start") Date start,
-												   @Param("end") Date date);
+												   @Param("start") LocalDate start,
+												   @Param("end") LocalDate date);
 
 	@Select("select memory_date as date, detail as detail from memory_record " +
 			"where user_id = #{userId} and date(memory_date) = date(#{date})")

@@ -102,6 +102,7 @@ class CardList extends React.Component  {
         }
 
         onTurnCard() {
+            if (this.state.start == false) return;
             // 正面且不是最后一个，才可以翻转卡片
             if (this.state.front && this.state.current != null) {
                 this.setState({

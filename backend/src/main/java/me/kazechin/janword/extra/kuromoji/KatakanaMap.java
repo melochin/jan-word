@@ -118,15 +118,5 @@ public class KatakanaMap {
 		return map.get(character);
 	}
 
-	public static void main(String[] args) {
-		// 96
-		Set<Map.Entry<Character, Character>> entries = map.entrySet();
-		for(Map.Entry entry : entries) {
-			if ((char)entry.getKey() - (char)entry.getValue() != 96) {
-				System.out.println(entry.getKey());
-			}
-		}
-	}
-
 }
 

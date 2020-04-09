@@ -18,7 +18,6 @@ public class KuromojiService {
 		this.tokenizer = new Tokenizer();
 	}
 
-
 	public String getReading(String word, boolean needHira) {
 		List<Token> tokens = tokenizer.tokenize(word);
 
@@ -31,21 +30,38 @@ public class KuromojiService {
 		return transformKataToHira(reading);
 	}
 
-	public List<String[]> getReadings(String word, boolean needHira) {
+	/**
+	 *
+	 * @param word
+	 * @return
+	 */
+	public List<String[]> getReadings(String word) {
 		List<Token> tokens = tokenizer.tokenize(word);
-		List<String[]> res= tokens.stream()
-				.map(t -> new String[]{t.getSurface(), t.getReading()})
+		return tokens.stream()
+				.map(t -> getSurfaceAndReadingArrary(t))
 				.collect(toList());
-
-		if (needHira == false) return res;
-
-		for(String[] strs : res) {
-			strs[1] = transformKataToHira(strs[1]);
-		}
-
-		return res;
 	}
 
+	/**
+	 * 获得[surface, reading]的数组
+	 * surface和reading相同的情况，reading为空字符串
+	 * reading采用平假名
+	 * @param t
+	 * @return
+	 */
+	private String[] getSurfaceAndReadingArrary(Token t) {
+		String hira = transformKataToHira(t.getReading());
+		if (t.getSurface().equals(t.getReading()) || t.getSurface().equals(hira)) {
+			return new String[]{t.getSurface(), ""};
+		}
+		return new String[]{t.getSurface(), hira};
+	}
+
+	/**
+	 * 片假名 -> 平假名
+	 * @param word
+	 * @return
+	 */
 	public String transformKataToHira(String word) {
 		StringBuilder res = new StringBuilder();
 		for(Character c : word.toCharArray()) {
@@ -63,7 +79,7 @@ public class KuromojiService {
 	public static void main(String[] args) {
 		KuromojiService kuromojiService = new KuromojiService();
 
-		kuromojiService.getReadings("間", true)
+		kuromojiService.getReadings("私は毎朝パンを食べます")
 				.stream()
 				.forEach(strs -> System.out.println(Arrays.toString(strs)));
 	}

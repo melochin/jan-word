@@ -1,6 +1,7 @@
 package me.kazechin.janword;
 
 import com.fasterxml.jackson.databind.ser.std.StringSerializer;
+import me.kazechin.janword.config.TokenConfig;
 import me.kazechin.janword.extra.weblio.Weblio;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.beans.factory.annotation.Value;
@@ -57,6 +58,11 @@ public class JanWordApplication implements WebMvcConfigurer {
 		redisTemplate.setHashKeySerializer(new StringRedisSerializer());
 		redisTemplate.setHashValueSerializer(new GenericJackson2JsonRedisSerializer());
 		return redisTemplate;
+	}
+
+	@Bean
+	public TokenConfig tokenConfig() {
+		return new TokenConfig();
 	}
 
 

@@ -1,10 +1,11 @@
 import React, {useState, useEffect}from 'react';
-import { Form, Input, Button, Popover, Row, Col, List } from 'antd';
+import { Form, Input, Button, Popover, Row, Col, List,Modal } from 'antd';
 import { Table } from 'antd';
 import {ModalForm, useModalForm} from './modalForm';
 import {add, remove, list, modify} from '../../action/wordAction.js';
 import weblio from '../../action/weblioAction.js';
 import { visible } from 'ansi-colors';
+const { confirm } = Modal;
 
 const layout = {
     labelCol: { span: 6 },
@@ -138,7 +139,7 @@ export function WordTable() {
                       <Button  type='primary' style={{marginRight: '5px'}}
                         onClick={() => modalForm.setModify(record)}
                       >修改</Button>
-                      <Button type='danger' onClick={() => onDelete(record.id)}>删除</Button>
+                      <Button type='danger' onClick={() => handleConfirm(() => onDelete(record.id))}>删除</Button>
                   </span>
               )
           }
@@ -185,3 +186,19 @@ export function WordTable() {
         </div>
     )
 }
+
+const handleConfirm = (deleFunc) => {
+    confirm({
+      title: '确认删除?',
+      okText: 'Yes',
+      okType: 'danger',
+      cancelText: 'No',
+      onOk() {
+        deleFunc();
+      },
+      onCancel() {
+    
+      },
+    });
+  }
+  

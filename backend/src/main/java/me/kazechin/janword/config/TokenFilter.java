@@ -4,7 +4,6 @@ package me.kazechin.janword.config;
 import me.kazechin.janword.user.TokenService;
 import me.kazechin.janword.user.UserInfo;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;

@@ -2,6 +2,8 @@ package me.kazechin.janword.card;
 
 import me.kazechin.janword.word.Word;
 import me.kazechin.janword.word.WordDao;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +17,8 @@ public class MemoryWordService {
 
 	@Autowired
 	private WordDao wordDao;
+
+	private final Logger logger = LoggerFactory.getLogger(MemoryWordService.class);
 
 	public List<Word> list(int userId, int limit) {
 
@@ -44,6 +48,9 @@ public class MemoryWordService {
 			List<Word> reviewWords = wordDao.rememberReview(userId, total - uniqueWord.size());
 			uniqueWord.addAll(reviewWords);
 		}
+
+		logger.info("list word, old: {} , wrong: {}, lessMemory: {}",
+				oldWords.size(), wrongWords.size(), uniqueWord.size() - oldWords.size() - wrongWords.size());
 
 		return uniqueWord.stream().collect(Collectors.toList());
 	}

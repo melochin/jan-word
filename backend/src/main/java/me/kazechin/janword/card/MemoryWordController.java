@@ -22,7 +22,7 @@ public class MemoryWordController implements MemoryControllerInter {
 
 	private MemoryCache memoryCache;
 
-	private MemoryDao memoryDao;
+	private MemoryDetailDao memoryDetailDao;
 
 	private MemoryRecordDao memoryRecordDao;
 
@@ -33,12 +33,12 @@ public class MemoryWordController implements MemoryControllerInter {
 	@Autowired
 	public MemoryWordController(WordDao wordDao,
 								MemoryCache memoryCache,
-								MemoryDao memoryDao,
+								MemoryDetailDao memoryDetailDao,
 								MemoryRecordDao memoryRecordDao,
 								MemoryWordService memoryWordService) {
 		this.wordDao = wordDao;
 		this.memoryCache = memoryCache;
-		this.memoryDao = memoryDao;
+		this.memoryDetailDao = memoryDetailDao;
 		this.memoryRecordDao = memoryRecordDao;
 		this.memoryWordService = memoryWordService;
 	}
@@ -51,7 +51,7 @@ public class MemoryWordController implements MemoryControllerInter {
 		List<Word> words = getWords(user.getUserId());
 		res.put("datasource", words);
 		res.put("count", wordDao.count());
-		res.put("countRemember", wordDao.countRemember());
+		res.put("countRemember", wordDao.countRemember(user.getUserId()));
 
 		return res;
 	}
@@ -92,8 +92,8 @@ public class MemoryWordController implements MemoryControllerInter {
 		for(Map.Entry<String,TempMemory> entry : map.entrySet()) {
 			int wordId = Integer.valueOf(entry.getKey());
 
-			if (memoryDao.modifyLastDate(userId, wordId, entry.getValue().isWrong()) == 0) {
-				memoryDao.add(userId, wordId, entry.getValue().isWrong());
+			if (memoryDetailDao.modifyLastDate(userId, wordId, 0, entry.getValue().isWrong()) == 0) {
+				memoryDetailDao.add(userId, wordId, 0, entry.getValue().isWrong());
 			}
 		}
 
