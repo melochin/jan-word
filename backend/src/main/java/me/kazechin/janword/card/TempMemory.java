@@ -1,9 +1,12 @@
 package me.kazechin.janword.card;
 
+/**
+ * 记录 记忆中的情况
+ */
 public class TempMemory {
-
+	// 正确次数
 	private int right;
-
+	// 是否出现过错误
 	private boolean isWrong;
 
 	public TempMemory(){

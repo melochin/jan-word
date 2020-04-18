@@ -62,7 +62,7 @@ public class KuromojiService {
 	 * @param word
 	 * @return
 	 */
-	public String transformKataToHira(String word) {
+	private String transformKataToHira(String word) {
 		StringBuilder res = new StringBuilder();
 		for(Character c : word.toCharArray()) {
 			Character hira = KatakanaMap.get(c);

@@ -30,19 +30,23 @@ public class MemoryGrammarController implements MemoryControllerInter {
 
 	private MemoryDetailDao memoryDetailDao;
 
+	private MemoryGrammarService memoryGrammarService;
+
 	@Autowired
 	public MemoryGrammarController(MemoryCache memoryCache,
 								   GrammarDao grammarDao,
 								   SentenceDao sentenceDao,
 								   MemoryRecordDao memoryRecordDao,
 								   KuromojiService kuromojiService,
-								   MemoryDetailDao memoryDetailDao) {
+								   MemoryDetailDao memoryDetailDao,
+								   MemoryGrammarService memoryGrammarService) {
 		this.memoryCache = memoryCache;
 		this.grammarDao = grammarDao;
 		this.sentenceDao = sentenceDao;
 		this.memoryRecordDao = memoryRecordDao;
 		this.kuromojiService = kuromojiService;
 		this.memoryDetailDao = memoryDetailDao;
+		this.memoryGrammarService = memoryGrammarService;
 	}
 
 
@@ -91,7 +95,7 @@ public class MemoryGrammarController implements MemoryControllerInter {
 			return grammars;
 		}
 
-		grammars = grammarDao.list();
+		grammars = memoryGrammarService.list(userId);
 		grammars.forEach(g -> g.setSentences(sentenceDao.list(g.getId())));
 
 		memoryCache.put(
@@ -126,8 +130,8 @@ public class MemoryGrammarController implements MemoryControllerInter {
 		for(Map.Entry<String,TempMemory> entry : map.entrySet()) {
 			int grammarId = Integer.valueOf(entry.getKey());
 
-			if (memoryDetailDao.modifyLastDate(userId, grammarId, 1, entry.getValue().isWrong()) == 0) {
-				memoryDetailDao.add(userId, grammarId, 1, entry.getValue().isWrong());
+			if (memoryDetailDao.modifyLastDate(userId, grammarId, Constants.Type.GRAMMAR, entry.getValue().isWrong()) == 0) {
+				memoryDetailDao.add(userId, grammarId, Constants.Type.GRAMMAR, entry.getValue().isWrong());
 			}
 		}
 
@@ -140,7 +144,7 @@ public class MemoryGrammarController implements MemoryControllerInter {
 	@PatchMapping("/card/grammar/remeber/{id}")
 	public boolean remember(@AuthenticationPrincipal UserInfo user, @PathVariable Integer id) {
 		int userId = user.getUserId();
-		return memoryCache.remeber(MemoryCache.keyGrammar(userId), id) >= 2;
+		return memoryCache.remeber(MemoryCache.keyGrammar(userId), id) >= 1;
 	}
 
 

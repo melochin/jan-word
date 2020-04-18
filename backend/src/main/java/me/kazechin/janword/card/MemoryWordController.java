@@ -28,8 +28,6 @@ public class MemoryWordController implements MemoryControllerInter {
 
 	private MemoryWordService memoryWordService;
 
-	private static int limit = 20;
-
 	@Autowired
 	public MemoryWordController(WordDao wordDao,
 								MemoryCache memoryCache,
@@ -66,7 +64,7 @@ public class MemoryWordController implements MemoryControllerInter {
 					.collect(toList());
 		}
 
-		List<Word> words = memoryWordService.list(userId, limit);
+		List<Word> words = memoryWordService.list(userId);
 
 		memoryCache.put(
 				MemoryCache.keyWord(userId),
@@ -92,8 +90,8 @@ public class MemoryWordController implements MemoryControllerInter {
 		for(Map.Entry<String,TempMemory> entry : map.entrySet()) {
 			int wordId = Integer.valueOf(entry.getKey());
 
-			if (memoryDetailDao.modifyLastDate(userId, wordId, 0, entry.getValue().isWrong()) == 0) {
-				memoryDetailDao.add(userId, wordId, 0, entry.getValue().isWrong());
+			if (memoryDetailDao.modifyLastDate(userId, wordId, Constants.Type.WORD, entry.getValue().isWrong()) == 0) {
+				memoryDetailDao.add(userId, wordId, Constants.Type.WORD, entry.getValue().isWrong());
 			}
 		}
 

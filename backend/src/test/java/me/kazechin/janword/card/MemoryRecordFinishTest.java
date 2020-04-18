@@ -16,7 +16,7 @@ class MemoryRecordFinishTest {
 
 	private MemoryCache memoryCache = mock(MemoryCache.class);
 
-	private MemoryDao memoryDao = mock(MemoryDao.class);
+	private MemoryDetailDao memoryDetailDao = mock(MemoryDetailDao.class);
 
 	private MemoryRecordDao memoryRecordDao = mock(MemoryRecordDao.class);
 
@@ -28,7 +28,7 @@ class MemoryRecordFinishTest {
 
 		when(memoryCache.list(MemoryCache.keyWord(userId))).thenReturn(new HashSet<>());
 
-		MemoryWordController memoryWordController = new MemoryWordController(wordDao, memoryCache, memoryDao, memoryRecordDao, memoryWordService);
+		MemoryWordController memoryWordController = new MemoryWordController(wordDao, memoryCache, memoryDetailDao, memoryRecordDao, memoryWordService);
 		memoryWordController.finish(new UserInfo(userId, "0", null));
 
 		// 移除缓存
