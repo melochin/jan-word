@@ -1,7 +1,12 @@
-package me.kazechin.janword.grammar;
+package me.kazechin.janword.model;
 
 import java.util.List;
 
+/**
+ * 例句
+ * @see me.kazechin.janword.model.Grammar 的例句
+ */
+// TODO 考虑单词的例句
 public class Sentence {
 
 	private Integer id;

@@ -2,23 +2,29 @@ import React, {useState, useEffect}from 'react';
 import { Form, Input, Button, Popover, Row, Col, List,Modal } from 'antd';
 import { Table } from 'antd';
 import {ModalForm, useModalForm} from './modalForm';
-import {add, remove, list, modify} from '../../action/wordAction.js';
+import {batchAdd, add, remove, list, modify} from '../../action/wordAction.js';
 import weblio from '../../action/weblioAction.js';
-import { visible } from 'ansi-colors';
+import {FormList} from '../common/formList';
+
 const { confirm } = Modal;
+const { TextArea } = Input;
 
 const layout = {
-    labelCol: { span: 6 },
-    wrapperCol: { span: 12 },
+    labelCol: { 
+        xs: { span: 24 },
+        sm: { span: 4 },
+    },
+    wrapperCol: {
+        xs: { span: 24 },
+        sm: { span: 16 },
+    },
   };
   
 const WordForm = ({form, onSubmit}) => {
 
-    const [visible, setVisible] = useState(false);
     const [content, setContent] = useState([]);
 
     const onSearch = (e,val ) => {
-        setVisible(true);
         weblio.getMeanings(form.getFieldValue('word'))
             .then(list => {
                 setContent(list);
@@ -30,7 +36,6 @@ const WordForm = ({form, onSubmit}) => {
             <Col span={12}>
             <Form form={form} onFinish={(values) => {
                 onSubmit(values)
-                setVisible(false);
             }} {...layout}>
                 <Form.Item name="word" label="日语" 
                     validateTrigger={['onChange', 'onBlur']}
@@ -49,6 +54,10 @@ const WordForm = ({form, onSubmit}) => {
                         <Input/>
                 </Form.Item>
                 {items}
+                <FormList name="sentences"  fieldName="sentence" label="例句" formItemLayout={layout} />
+                <Form.Item wrapperCol={{ ...layout.wrapperCol, offset: 6 }} >
+                    <Button type="primary" htmlType="submit">提交</Button>
+                </Form.Item>
             </Form>
             </Col>
             <Col span={12}>
@@ -65,6 +74,34 @@ const WordForm = ({form, onSubmit}) => {
         </Row>
     )
 }
+
+const BatchWordForm = ({form, onSubmit}) => {
+
+    return (
+        <Row>
+            <Col span={24}>
+            <Form form={form} 
+                labelCol={{ span: 4 }}
+                wrapperCol={{ span: 18 }}
+                onFinish={(values) => {
+                    onSubmit(values)
+                }}>
+                <Form.Item name="text" label="文本" 
+                    rules={[
+                        {
+                            required: true,
+                            message: '请输入日语文本'
+                        },
+                    ]}>
+                        <TextArea rows={10}/>
+                </Form.Item>
+                <Button type="primary" htmlType="submit">提交</Button>
+            </Form>
+            </Col>
+        </Row>
+    )
+}
+
 
 const items = [
     (
@@ -89,18 +126,16 @@ const items = [
             <Input />
         </Form.Item>
     ),
-    (
-        <Form.Item wrapperCol={{ ...layout.wrapperCol, offset: 6 }} >
-            <Button type="primary" htmlType="submit">提交</Button>
-        </Form.Item>
-    )
 ]
 
 
 export function WordTable() {
 
+    const batchForm = useModalForm();
     const modalForm = useModalForm();
     const [dataSource, setDataSource] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [pagination, setPagination] = useState({current:1, pageSize:1, total: 0});
 
     useEffect(() => {
       onList()  
@@ -145,9 +180,30 @@ export function WordTable() {
           }
     ];
 
-    const onList = async () => {
-        const dataSource = await list();
-        setDataSource(dataSource);
+    const onList = async (params) => {
+        setLoading(true);
+
+        if (params == undefined) {
+            params = {
+              page: pagination.current,
+            }
+        } 
+
+        const res = await list(params);
+        setDataSource(res.dataset);
+        setLoading(false);
+        setPagination({
+            current: res.pageNum,
+            pageSize: res.pageSize == 0 ? 1 : res.pageSize,
+            total: res.total
+          });
+
+    }
+
+    const onBatchAdd = async(values) => {
+        await batchAdd(values['text']);
+        onList();
+        batchForm.onCancel();
     }
 
     const onAdd = async (values) => {
@@ -168,12 +224,28 @@ export function WordTable() {
         onList();
     }
 
+    const handleTableChange = (pagination, filters) => {
+        onList({page: pagination.current});
+      };
+
+
       return (
+
         <div>
             <div className="table-operations">
                 <Row style={{marginBottom: "10px"}}>
                     <Button onClick={modalForm.setAdd}>新增</Button>
+                    <Button onClick={batchForm.setAdd}>批量新增</Button>
                 </Row>
+
+                <ModalForm
+                    width={800}
+                    onAdd={onBatchAdd}
+                    {...batchForm}>
+                        {(form) => <BatchWordForm {...form} />}
+                </ModalForm>
+
+
                 <ModalForm 
                     width={800}
                     {...modalForm}
@@ -182,7 +254,9 @@ export function WordTable() {
                         {(form) => <WordForm {...form} />}
                 </ModalForm>
             </div>
-        <Table columns={columns} dataSource={dataSource} rowKey={record => record.id}/>
+        <Table columns={columns} dataSource={dataSource} rowKey={record => record.id}
+            onChange={handleTableChange}
+            loading={loading} pagination={pagination}/>
         </div>
     )
 }

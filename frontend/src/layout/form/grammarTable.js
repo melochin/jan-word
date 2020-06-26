@@ -1,33 +1,40 @@
 import React, {useState, useEffect} from 'react';
 import { Row, Col, Form, Input, Button, Table, Modal} from 'antd';
-import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
 import TextArea from 'antd/lib/input/TextArea';
 import {add, list, remove, modify} from '../../action/grammarAction';
 import {ModalForm, useModalForm} from './modalForm';
+import {FormList} from '../common/formList';
 
 const { confirm } = Modal;
 
-const formItemLayout = {
-  labelCol: {
-    xs: { span: 24 },
-    sm: { span: 4 },
-  },
-  wrapperCol: {
-    xs: { span: 24 },
-    sm: { span: 10 },
-  },
-};
-const formItemLayoutWithOutLabel = {
-  wrapperCol: {
-    xs: { span: 24, offset: 0 },
-    sm: { span: 10, offset: 4 },
-  },
-};
-
 export const GrammarForm = ({form, onSubmit}) => {
+
+  const formItemLayout = {
+    labelCol: {
+      xs: { span: 24 },
+      sm: { span: 4 },
+    },
+    wrapperCol: {
+      xs: { span: 24 },
+      sm: { span: 10 },
+    },
+  };
+  const formItemLayoutWithOutLabel = {
+    wrapperCol: {
+      xs: { span: 24, offset: 0 },
+      sm: { span: 10, offset: 4 },
+    },
+  };
+
   const onFinish = values => {
     onSubmit(values);
   };
+
+  const rulesForSentence = [{
+    required: true,
+    whitespace: true,
+    message: "请输入例句",
+  }]
 
   return (
     <Form form={form} name="dynamic_form_item" {...formItemLayoutWithOutLabel} onFinish={onFinish}>
@@ -37,60 +44,7 @@ export const GrammarForm = ({form, onSubmit}) => {
         <Form.Item name="detail" label="说明" {...formItemLayout}>
             <TextArea />
         </Form.Item>
-      <Form.List name="sentences">
-        {(fields, { add, remove }) => {
-          return (
-            <div>
-              {fields.map((field, index) => (
-                <Form.Item
-                  {...(index === 0 ? formItemLayout : formItemLayoutWithOutLabel)}
-                  label={index === 0 ? '例句' : ''}
-                  required={false}
-                  key={field.key}
-                >
-              {console.log(field)}
-                  <Form.Item
-                    {...field}
-                    name={[field.name, 'sentence']}
-                    validateTrigger={['onChange', 'onBlur']}
-
-                    rules={[
-                      {
-                        required: true,
-                        whitespace: true,
-                        message: "请输入例句",
-                      },
-                    ]}
-                    noStyle
-                  >
-                    <Input style={{ width: '80%', marginRight: 8 }} />
-                  </Form.Item>
-                  {fields.length > 0 ? (
-                    <MinusCircleOutlined
-                      className="dynamic-delete-button"
-                      onClick={() => {
-                        remove(field.name);
-                      }}
-                    />
-                  ) : null}
-                </Form.Item>
-              ))}
-              <Form.Item>
-                <Button
-                  type="dashed"
-                  onClick={() => {
-                    add();
-                  }}
-                  style={{ width: '60%' }}
-                >
-                  <PlusOutlined /> 新增例句
-                </Button>
-              </Form.Item>
-            </div>
-          );
-        }}
-      </Form.List>
-
+      <FormList name="sentences"  fieldName="sentence" label="例句" rules={rulesForSentence}/>
       <Form.Item>
         <Button type="primary" htmlType="submit">
           Submit
@@ -102,9 +56,9 @@ export const GrammarForm = ({form, onSubmit}) => {
 
 const Filter = ({onList}) => {
 
-const submit = (vals) => {
-  vals.keyword == '' ? onList() : onList(vals);
-}
+  const submit = (vals) => {
+    onList({page:1, keyword: vals.keyword});
+  }
 
   return (
     <Form layout='inline'  onFinish={submit}>
@@ -123,10 +77,13 @@ export function GrammarTable () {
 
   const modalForm = useModalForm();
   const [dataSource, setDataSource] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [pagination, setPagination] = useState({current:1, pageSize:1, total: 0});
+  const [keyword, setKeyword] = useState(null);
 
   useEffect(() => {
-    onList()  
-  }, [])
+      onList()  
+    }, [])
 
   const columns = [
     {
@@ -148,8 +105,31 @@ export function GrammarTable () {
   ]
 
   const onList = async (params) => {
-    const dataSource = await list(params);
-    setDataSource(dataSource);
+    setLoading(true);
+    
+    if (params == undefined) {
+      params = {
+        page: pagination.current,
+        keyword: keyword,
+      }
+    } else {
+      if (params['page'] == undefined) {
+        params['page'] = pagination.current;
+      }
+      if (params['keyword'] == undefined) {
+        params['keyword'] = keyword;
+      }
+    }
+
+    const res = await list(params);
+    setDataSource(res.dataset);
+    setLoading(false);
+    setPagination({
+      current: res.pageNum,
+      pageSize: res.pageSize == 0 ? 1 : res.pageSize,
+      total: res.total
+    });
+    setKeyword(params.keyword);
   }
 
   const onAdd = async (values) => {
@@ -171,6 +151,10 @@ const onDelete = async (id) => {
     onList();
 }
 
+  const handleTableChange = (pagination, filters) => {
+    onList({page: pagination.current});
+  };
+
   return (
     <div>
       <div className="table-operations">
@@ -189,7 +173,9 @@ const onDelete = async (id) => {
           {(form) => <GrammarForm {...form} />}
         </ModalForm>
       </div>
-      <Table columns={columns} dataSource={dataSource} rowKey={record => record.id}/>
+      <Table columns={columns} dataSource={dataSource} rowKey={record => record.id} 
+        onChange={handleTableChange}
+        loading={loading} pagination={pagination}/>
     </div>
     )
 }

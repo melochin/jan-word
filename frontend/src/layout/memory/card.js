@@ -1,11 +1,11 @@
 import React from 'react';
-import {Row, Col, Button} from 'antd';
-import { CaretLeftOutlined, CaretRightOutlined } from '@ant-design/icons';
+import {Row, Col, Button, Result} from 'antd';
+import { CaretLeftOutlined, CaretRightOutlined, SmileOutlined } from '@ant-design/icons';
 
 const Card = ({value}) => {
     return (
         <Row justify="space-around" align="middle"  style={{height: '100%', textAlign: 'center'}}>
-            <Col span={24} style={{fontSize: "1.5rem"}}>
+            <Col span={18} style={{fontSize: "1rem"}}>
                 {value}
             </Col>
         </Row>
@@ -14,10 +14,9 @@ const Card = ({value}) => {
 
 const EndCard = () => {
     const ele = (
-        <div>
-                <p>{'おつかれ'}</p>
-                <p>{'（●´∀｀）♪'}</p>
-        </div>
+          <Result
+          icon={<SmileOutlined />}
+          title="おつかれ" />
     )
     return (<Card value={ele} />);
 }
@@ -40,14 +39,25 @@ class CardList extends React.Component  {
         }
 
         async componentDidMount() {
-            let data = await this.props.list()
-            this.list = data.datasource;
-            this.setState({
-                current: this.list != null ? this.list.pop() : null,
-                count: data.count,
-                countRemember: data.countRemember
-            })
+            try {
+                let data = await this.props.list()
+                this.list = data.datasource;
+                this.setState({
+                    current: this.list != null ? this.list.pop() : null,
+                    count: data.count,
+                    countRemember: data.countRemember
+                })
+            }  catch(error) {
+                console.log(error);
+            }
+            
             document.addEventListener('keydown', this.onKeyDown);
+        }
+        
+        componentDidUpdate() {
+            if (this.state.start && this.state.front) {
+                this.readCard();
+            }
         }
 
         async onNextCard() {
@@ -137,6 +147,16 @@ class CardList extends React.Component  {
             )
         }
 
+        readCard() {
+            const rawText = document.getElementById('card').innerText;
+            var utterance = new SpeechSynthesisUtterance();
+            utterance.text = rawText;
+            utterance.lang = 'jp';
+            utterance.rate =0.5;
+            window.speechSynthesis.speak(utterance);
+            console.debug(utterance);
+        }
+
         render() {
             return (
                 <Row style={{height: '100%'}}   justify="space-around" align="middle" onClick={this.onTurnCard} >
@@ -144,7 +164,7 @@ class CardList extends React.Component  {
                     <Col span={20} align="middle" style={{height: '100%'}}>
                         <Col span={24} style={{height: '25%'}}></Col>
 
-                        <Col span={24} style={{height:'50%'}} >
+                        <Col id="card" span={24} style={{height:'50%'}} >
                             {this.state.start == false ? this.renderStart() : this.renderCard()}
                         </Col>
                         <Col span={24} style={{height:'25%'}}  >

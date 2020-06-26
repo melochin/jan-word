@@ -1,4 +1,4 @@
-package me.kazechin.janword.card;
+package me.kazechin.janword.controller;
 
 import me.kazechin.janword.user.UserInfo;
 

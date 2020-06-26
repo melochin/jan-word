@@ -1,13 +1,15 @@
-package me.kazechin.janword.word;
+package me.kazechin.janword.dao;
 
+import me.kazechin.janword.model.Word;
 import org.apache.ibatis.annotations.*;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Mapper
 public interface WordDao {
 
-	@Select("select * from word;")
+	@Select("select * from word")
 	List<Word> list();
 
 	@Insert("insert into word (word, gana, chinese, origin) values(#{word}, #{gana}, #{chinese}, #{origin})")
@@ -71,4 +73,6 @@ public interface WordDao {
 	Word get(@Param("id") Integer id);
 
 
+	@Select("select * from word where gana = #{gana}")
+	List<Word> listByGana(@Param("gana") String gana);
 }

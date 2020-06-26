@@ -12,6 +12,8 @@ public class TokenConfig {
 
 	private String special;
 
+	private String username;
+
 	public String getSecret() {
 		return secret;
 	}
@@ -34,5 +36,14 @@ public class TokenConfig {
 
 	public void setSpecial(String special) {
 		this.special = special;
+	}
+
+
+	public String getUsername() {
+		return username;
+	}
+
+	public void setUsername(String username) {
+		this.username = username;
 	}
 }

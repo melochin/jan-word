@@ -1,4 +1,4 @@
-package me.kazechin.janword.grammar;
+package me.kazechin.janword.model;
 
 import java.util.List;
 
@@ -45,8 +45,29 @@ public class Grammar {
 	}
 
 	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (!(o instanceof Grammar)) return false;
+
+		Grammar grammar1 = (Grammar) o;
+
+		if (id != grammar1.id) return false;
+		if (grammar != null ? !grammar.equals(grammar1.grammar) : grammar1.grammar != null) return false;
+		if (detail != null ? !detail.equals(grammar1.detail) : grammar1.detail != null) return false;
+		return true;
+	}
+
+	@Override
+	public int hashCode() {
+		int result = id;
+		result = 31 * result + (grammar != null ? grammar.hashCode() : 0);
+		result = 31 * result + (detail != null ? detail.hashCode() : 0);
+		return result;
+	}
+
+	@Override
 	public String toString() {
-		return "Grammar{" +
+		return "GRAMMAR{" +
 				"id=" + id +
 				", grammar='" + grammar + '\'' +
 				", detail='" + detail + '\'' +

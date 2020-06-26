@@ -1,11 +1,28 @@
 import React from 'react';
-import { Progress } from 'antd';
+import { Progress, Row } from 'antd';
 import CardList from './card';
 import {list, forget, remeber, finish} from '../../action/cardAction';
+import { Tag, Divider } from 'antd';
+
 
 const renderFront = (word) => {
+
+    const renderSentence = () => {
+        if (word.sentences == null || word.sentences.length == 0) return null;
+        return   (
+        <Row style={{marginBottom: '1rem'}}>
+                <Tag color="green">例句</Tag>
+                {word.sentences[parseInt(Math.random() * word.sentences.length)].sentence}
+        </Row>) 
+    }
+    
     return (
-        <p>{word.word}</p>
+        <div>
+            {renderSentence()}
+            <Row>
+                <Tag color="blue">单词</Tag>{word.word}
+            </Row>            
+        </div>
     )
 }
 
@@ -22,7 +39,12 @@ const renderStart = (count, countRemember) => {
 
     return (
         <div style={{marginBottom: '1rem'}}>
-            <Progress type="circle" percent={(countRemember / count * 100).toFixed(1)} />
+            <Progress type="circle" percent={
+                countRemember == 0 ? 
+                0 :
+                (countRemember / count * 100).toFixed(1)
+            } 
+                />
         </div>
     )
 }

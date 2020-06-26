@@ -1,4 +1,6 @@
-package me.kazechin.janword.word;
+package me.kazechin.janword.model;
+
+import java.util.List;
 
 public class Word {
 
@@ -11,6 +13,8 @@ public class Word {
 	private String chinese;
 
 	private String origin;
+
+	private List<Sentence> sentences;
 
 	public Word() {
 	}
@@ -85,4 +89,11 @@ public class Word {
 		this.origin = origin;
 	}
 
+	public List<Sentence> getSentences() {
+		return sentences;
+	}
+
+	public void setSentences(List<Sentence> sentences) {
+		this.sentences = sentences;
+	}
 }

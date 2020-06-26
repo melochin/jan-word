@@ -1,8 +1,7 @@
 package me.kazechin.handleword;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import me.kazechin.janword.word.Word;
-import org.springframework.transaction.annotation.Transactional;
+import me.kazechin.janword.model.Word;
 
 import java.io.*;
 import java.util.*;
@@ -76,8 +75,8 @@ public class TransferWord {
 
 
 	public static void main(String[] args) throws IOException {
-		TransferWord transferWord = new TransferWord("../词汇集/2.md", "标日第二课");
-		transferWord.parseToFile("../词汇集/2.json");
+		TransferWord transferWord = new TransferWord("../词汇集/4.md", "标日第四课");
+		transferWord.parseToFile("../词汇集/4.json");
 
 //				.map(array -> {
 //					Map<String, String> map = new HashMap<>();

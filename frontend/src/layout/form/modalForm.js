@@ -31,8 +31,7 @@ export const ModalForm = ({visible, onAdd, onModify, onCancel, children, initial
             width={width}
             visible={visible}
             title={title}
-            okText='Submit'
-            cancelText='Cancel'
+            footer={null}
             onCancel={onCancel}
             onOk={onSubmit}>
             {children({form, onSubmit})}

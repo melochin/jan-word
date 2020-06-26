@@ -1,5 +1,6 @@
-package me.kazechin.janword.card;
+package me.kazechin.janword.dao;
 
+import me.kazechin.janword.model.MemoryRecord;
 import org.apache.ibatis.annotations.*;
 
 import java.time.LocalDate;

@@ -1,6 +1,6 @@
-package me.kazechin.janword.grammar;
+package me.kazechin.janword.dao;
 
-import me.kazechin.janword.word.Word;
+import me.kazechin.janword.model.Grammar;
 import org.apache.ibatis.annotations.*;
 
 import java.util.List;
@@ -66,5 +66,5 @@ public interface GrammarDao {
 			"    ) as a\n" +
 			") \n" +
 			"\n")
-	List<Grammar> rememberOld(int userId, int limit);
+	List<Grammar> rememberOld(@Param("userId") int userId, @Param("limit") int limit);
 }

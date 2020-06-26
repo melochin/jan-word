@@ -25,14 +25,23 @@ axios.interceptors.response.use(
             error.message = '服务器故障'
             return Promise.reject(error);
         } else {
-            return error;
+            alert(error.message);
+            return Promise.reject(error);
         }
     }
 )
 
 export const list = () => {
     return axios.get(`${uri}/card/words`)
-        .then(response => response.data);
+        .then(
+            response => response.data, 
+            error => {
+                return {
+                    dataSource: null, count:0,  countRemember: 0
+                }
+            }
+        );
+
 }
 
 export const forget = (id) => {

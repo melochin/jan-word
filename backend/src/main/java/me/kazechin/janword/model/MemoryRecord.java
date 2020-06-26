@@ -1,9 +1,13 @@
-package me.kazechin.janword.card;
+package me.kazechin.janword.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 import java.util.Date;
 
+/**
+ * 记忆记录
+ * 每次用户完成一次记录任务时，会生成一笔记忆记录
+ */
 public class MemoryRecord {
 
 	private int userId;

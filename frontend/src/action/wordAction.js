@@ -37,11 +37,25 @@ let data = [
 //     })
 // }
 
+export const batchAdd = (values) => {
+    const config = {
+        headers: {"Content-Type": "text/plain"},
+    }
+    return axios.post(`${uri}/word/batch`, values, config);
+}
+
 export const add = (values) => {
     return axios.post(`${uri}/word`, values);
 }
 
-export const list = () => {
+export const list = (params) => {
+    if (params != undefined && params != null ) {
+        return axios.get(`${uri}/words`, {
+            params: params
+        })
+        .then(response => response.data);    
+    }
+
     return axios.get(`${uri}/words`)
         .then(response => response.data);
 }

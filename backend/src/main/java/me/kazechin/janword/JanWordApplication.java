@@ -1,27 +1,32 @@
 package me.kazechin.janword;
 
-import com.fasterxml.jackson.databind.ser.std.StringSerializer;
 import me.kazechin.janword.config.TokenConfig;
 import me.kazechin.janword.extra.weblio.Weblio;
-import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
-import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.web.method.annotation.AuthenticationPrincipalArgumentResolver;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
-import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.util.List;
 
+@ComponentScan({
+		"me.kazechin.janword.config",
+		"me.kazechin.janword.controller",
+		"me.kazechin.janword.dao",
+		"me.kazechin.janword.extra",
+		"me.kazechin.janword.model",
+		"me.kazechin.janword.service",
+		"me.kazechin.janword.user",
+})
 @SpringBootApplication
 public class JanWordApplication implements WebMvcConfigurer {
 

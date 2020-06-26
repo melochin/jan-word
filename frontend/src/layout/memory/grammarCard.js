@@ -7,17 +7,18 @@ const ReactMarkdown = require('react-markdown')
 const renderFront = (grammar) => {
     if (grammar.sentences == null) return null;
     let index = parseInt(Math.random() * grammar.sentences.length);
-    // 因为存在Markdown特殊字符的缘故，将它们转换成HTML字符串
-    // 然后禁止ReactMarkdown转义HTML即可渲染。
-    const eles = grammar.sentences[index].readings.map(reading => 
-        reading[1] == '' ? 
-        reading[0] :
-        `<ruby>${reading[0]}<rt>${reading[1]}</rt></ruby>`
-    ).join('');
-    console.log(eles);
+    const eles =  grammar.sentences[index].sentence;
+    // // 因为存在Markdown特殊字符的缘故，将它们转换成HTML字符串
+    // // 然后禁止ReactMarkdown转义HTML即可渲染。
+    // const eles = grammar.sentences[index].readings.map(reading => 
+    //     reading[1] == '' ? 
+    //     reading[0] :
+    //     `<ruby>${reading[0]}<rt>${reading[1]}</rt></ruby>`
+    // ).join('');
+    
     return (
         <React.Fragment>
-            <ReactMarkdown source={eles} escapeHtml={false}/>
+            <ReactMarkdown source={eles}/>
         </React.Fragment>
     )
     
