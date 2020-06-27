@@ -1,1 +1,1 @@
-export const uri = 'http://localhost:8080'
+export const uri = process.env.REACT_APP_HOST;
